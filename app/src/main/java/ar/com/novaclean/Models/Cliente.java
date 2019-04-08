@@ -10,11 +10,11 @@ package ar.com.novaclean.Models;
   `domicilio` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL*/
 public class Cliente {
     public int id;
-    public String Nombre;
-    public String Apellido;
-    public String CUIT;
-    public String Telefono;
-    public String Email;
-    public String Domicilio;
+    public String nombre;
+    public String apellido;
+    public String cuit;
+    public String telefono;
+    public String email;
+    public String domicilio;
 
 }

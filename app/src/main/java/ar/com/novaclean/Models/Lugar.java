@@ -19,13 +19,15 @@ import java.util.ArrayList;
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;*/
 public class Lugar {
     public int id;
-    public String Nombre;
-    public String Domicilio;
-    public String Telefono;
-    public String Email;
-    public String ContactoLocal;
-    public String FotoURL;
-    public ArrayList<Sector> Sectores;
-    public double Latitud;
-    public double Longitud;
+    public String nombre;
+    public String domicilio;
+    public String telefono;
+    public String email;
+    public String contacto_local;
+    public String foto_url;
+    public ArrayList<Sector> sectoresArray;
+    public double lat;
+    public double lon;
+    public int contrato_numero;
+    public String sectores;
 }

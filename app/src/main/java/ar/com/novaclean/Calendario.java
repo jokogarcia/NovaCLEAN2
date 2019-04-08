@@ -1,49 +1,49 @@
 package ar.com.novaclean;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.CalendarView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.google.gson.Gson;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
+import ar.com.novaclean.Models.Constants;
 import ar.com.novaclean.Models.Evento;
+import ar.com.novaclean.Models.Lugar;
+import ar.com.novaclean.Models.Sector;
 import ar.com.novaclean.Models.Tarea;
 import ar.com.novaclean.R;
 
 public class Calendario extends AppCompatActivity {
     private CalendarView calendarView;
     private ArrayList<Evento> Itinerario;
-
+    private int clientId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Itinerario = new ArrayList<Evento>();
-        Evento Ev1 = new Evento();
-        Ev1.Tareas=new ArrayList<Tarea>();
-        Tarea T1 = new Tarea();
-        T1.id=10;
-        T1.Descripcion="Barrer el piso";
-        T1.Minutos=3;
-        Tarea T2 = new Tarea();
-        T2.id=11;
-        T2.Descripcion="Barrer el techo";
-        T2.Minutos=3;
-        Ev1.Repetible=true;
-        Ev1.Tareas.add(T1);
-        Ev1.Tareas.add(T2);
-        Ev1.Dias= "Lunes,Miercoles,Viernes";
-        Ev1.Hora=18*60+30;
-        Itinerario.add(Ev1);
         setContentView(R.layout.activity_calendario);
         calendarView= findViewById(R.id.calendarView);
+        clientId=getIntent().getIntExtra("ClienteID",0);
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
@@ -89,5 +89,56 @@ public class Calendario extends AppCompatActivity {
 
             }
         });
+        getEventos(clientId);
     }
+
+    private void getEventos(final int clientId) {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.GET_EVENTOS_FROM_CLIENTES,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //Toast.makeText(MainActivity.this,response,Toast.LENGTH_LONG).show();
+                        Gson g = new Gson();
+                        Evento[] eventos;
+                        try{
+                            eventos = g.fromJson(response, Evento[].class);
+                            Itinerario = new ArrayList<>(Arrays.asList(eventos));
+                        }catch(IllegalStateException e){
+                            Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG);
+                        }
+                        showProgressBar(false);
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(Calendario.this,error.toString(),Toast.LENGTH_LONG).show();
+                        showProgressBar(false);
+                    }
+                }){
+            @Override
+            protected Map<String,String> getParams(){
+                SharedPreferences sharedPreferences = getSharedPreferences("Settings",MODE_PRIVATE);
+                String tok= sharedPreferences.getString("token","");
+                Map<String,String> params = new HashMap<String, String>();
+                params.put("client_id",""+clientId);
+                params.put("tok",tok);
+                return params;
+            }
+
+        };
+        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+
+    private void showProgressBar(boolean b) {
+        ProgressBar PB = findViewById(R.id.progressBar);
+        if(b)
+            PB.setVisibility(View.VISIBLE);
+        else
+            PB.setVisibility(View.INVISIBLE);
+    }
+
+
 }
