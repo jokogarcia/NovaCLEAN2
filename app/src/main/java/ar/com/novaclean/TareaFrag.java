@@ -107,6 +107,6 @@ public class TareaFrag extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         TextView T = (TextView) getView().findViewById(R.id.descripcion);
-        T.setText(tarea.Descripcion);
+        T.setText(tarea.descripcion);
     }
 }

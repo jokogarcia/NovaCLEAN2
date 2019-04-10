@@ -2,6 +2,8 @@ package ar.com.novaclean;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.provider.CalendarContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +16,8 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.github.sundeepk.compactcalendarview.CompactCalendarView;
+import com.github.sundeepk.compactcalendarview.domain.Event;
 import com.google.gson.Gson;
 
 import java.text.ParseException;
@@ -24,6 +28,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
@@ -34,61 +39,50 @@ import ar.com.novaclean.Models.Tarea;
 import ar.com.novaclean.R;
 
 public class Calendario extends AppCompatActivity {
-    private CalendarView calendarView;
+    private CompactCalendarView calendarView;
     private ArrayList<Evento> Itinerario;
+    ArrayList<ExtendedEvent> ExtendedEvents;
     private int clientId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Itinerario = new ArrayList<Evento>();
         setContentView(R.layout.activity_calendario);
-        calendarView= findViewById(R.id.calendarView);
+        calendarView= findViewById(R.id.compactcalendar_view);
         clientId=getIntent().getIntExtra("ClienteID",0);
-        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+        calendarView.setListener(new CompactCalendarView.CompactCalendarViewListener() {
             @Override
-            public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
-            //Obtener fecha Seleccionada
-            Calendar calendar = new GregorianCalendar(year,month,dayOfMonth);
-            String[] strDays = new String[] {"Domingo", "Lunes", "Martes", "Miercoles", "Jueves",
-                        "Viernes", "Sabado" };
-            String DiaDeLaSemana=strDays[calendar.get(Calendar.DAY_OF_WEEK)-1];
-            ArrayList<Evento> EventosDelDia=new ArrayList<Evento>();
-            for(Evento E : Itinerario){
-                Boolean selectme=false;
-                if(E.Repetible){
-                    if(E.Dias.contains(DiaDeLaSemana)){
-                        selectme=true;
+            public void onDayClick(Date dateClicked) {
+                List<Event> events = calendarView.getEvents(dateClicked);
+                ArrayList<Evento> EventosDelDia=new ArrayList<>();
+                for(ExtendedEvent E:ExtendedEvents){
+                    for(Event CE:events){
+                        if(CE.equals(E.CalendarEvent))
+                            EventosDelDia.add(E.NovaEvent);
                     }
+                }
+                if(EventosDelDia.size()==0){
+                    Toast.makeText(getApplicationContext(),"Sin eventos",Toast.LENGTH_SHORT);
+                }
+                else if(EventosDelDia.size()==1){
+                    //Un Solo evento, ir a ese evento;
+                    Intent myIntent = new Intent(getApplicationContext(), DetallesEvento.class);
+                    myIntent.putExtra("Evento",EventosDelDia.get(0));
+                    startActivity(myIntent);
                 }
                 else{
-                    Date tmp=calendar.getTime();
-                    if(E.Fecha.equals(tmp)){
-                        selectme=true;
-                    }
+                    Intent myIntent = new Intent(getApplicationContext(), ListaDeEventos.class);
+                    myIntent.putExtra("Eventos",EventosDelDia);
+                    startActivity(myIntent);
                 }
-                if(selectme){
-                    EventosDelDia.add(E);
-                }
-            }
-            if(EventosDelDia.size()==0){
-                Toast.makeText(getApplicationContext(), "Sin eventos en el día seleccionado",
-                        Toast.LENGTH_SHORT).show();
-            }
-            else if(EventosDelDia.size()==1){
-                //Un Solo evento, ir a ese evento;
-                Intent myIntent = new Intent(getApplicationContext(), DetallesEvento.class);
-                myIntent.putExtra("Evento",EventosDelDia.get(0));
-                startActivity(myIntent);
-            }
-            else{
-                //Varios eventos. Ir a la lista de eventos;
-                Intent myIntent = new Intent(getApplicationContext(), ListaDeEventos.class);
-                myIntent.putExtra("Eventos",EventosDelDia);
-                startActivity(myIntent);
             }
 
+            @Override
+            public void onMonthScroll(Date firstDayOfNewMonth) {
+                populateCalendario(Itinerario);
             }
         });
+
         getEventos(clientId);
     }
 
@@ -103,6 +97,7 @@ public class Calendario extends AppCompatActivity {
                         try{
                             eventos = g.fromJson(response, Evento[].class);
                             Itinerario = new ArrayList<>(Arrays.asList(eventos));
+                            populateCalendario(Itinerario);
                         }catch(IllegalStateException e){
                             Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG);
                         }
@@ -131,6 +126,40 @@ public class Calendario extends AppCompatActivity {
         MySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
+    private void populateCalendario(ArrayList<Evento> itinerario) {
+        String alldays = "DLMXJVS";
+        ExtendedEvents = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        for (Evento E : itinerario) {
+            cal.setFirstDayOfWeek(Calendar.MONDAY);
+
+            if (E.repetible) {
+                int CurrentMonth = cal.get(Calendar.MONTH);
+                char thisDay;
+                cal.setTime(calendarView.getFirstDayOfCurrentMonth());
+                while (cal.get(Calendar.MONTH) == CurrentMonth) {
+                    thisDay = alldays.charAt(cal.get(Calendar.DAY_OF_WEEK));
+                    if (E.dias.contains(String.valueOf(thisDay))
+                            && E.fecha_inicio.before(cal.getTime())) {
+                        //Do Stuff;
+                        //Event(new Event(Color.CYAN, cal.getTimeInMillis()));
+                        ExtendedEvents.add(new ExtendedEvent(E,Color.CYAN,cal.getTimeInMillis()));
+                    }
+                    cal.add(Calendar.DATE, 1);
+                }
+            }
+            else{
+                ExtendedEvents.add(new ExtendedEvent(E,Color.MAGENTA,E.fecha.getTime()));
+            }
+        }
+        ArrayList<Event> EVS = new ArrayList<>();
+        for(ExtendedEvent E : ExtendedEvents){
+            EVS.add(E.CalendarEvent);
+        }
+        calendarView.removeAllEvents();
+        calendarView.addEvents(EVS);
+    }
+
 
     private void showProgressBar(boolean b) {
         ProgressBar PB = findViewById(R.id.progressBar);
@@ -139,6 +168,13 @@ public class Calendario extends AppCompatActivity {
         else
             PB.setVisibility(View.INVISIBLE);
     }
-
+    private class ExtendedEvent{
+        public Event CalendarEvent;
+        public Evento NovaEvent;
+        public ExtendedEvent(Evento E, int Color, long t){
+            this.NovaEvent=E;
+            this.CalendarEvent = new Event(Color,t);
+        }
+    }
 
 }

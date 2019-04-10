@@ -54,11 +54,11 @@ public class DetallesEvento extends AppCompatActivity {
             }
         });
         EventoActual = (Evento) getIntent().getSerializableExtra("Evento");
-        if(EventoActual.Repetible)
-            LabelDia.setText(EventoActual.Dias);
+        if(EventoActual.repetible)
+            LabelDia.setText(EventoActual.dias);
         else
-            LabelDia.setText(EventoActual.Fecha.toString());
-        String h= String.format("%02d:%02d",(int)EventoActual.Hora/60,(int)EventoActual.Hora%60);
+            LabelDia.setText(EventoActual.fecha.toString());
+        String h= String.format("%02d:%02d",(int)EventoActual.hora/60,(int)EventoActual.hora%60);
         LabelHora.setText(h);
         LayoutInflater inflater = getLayoutInflater();
         TareasWidgList.clear();
@@ -108,8 +108,8 @@ public class DetallesEvento extends AppCompatActivity {
         public TareaWidg(Tarea T, LayoutInflater inflater, ViewGroup parent){
             this.Tarea=T;
             view = inflater.inflate(R.layout.tarea_fragment,parent,false);
-            ((TextView)view.findViewById(R.id.TareaDescripcion)).setText(T.Descripcion);
-            ((TextView)view.findViewById(R.id.TareaMinutos)).setText(T.Minutos+" min");
+            ((TextView)view.findViewById(R.id.TareaDescripcion)).setText(T.descripcion);
+            ((TextView)view.findViewById(R.id.TareaMinutos)).setText(T.minutos+" min");
         }
         public View getView(){
             return view;
@@ -122,7 +122,7 @@ public class DetallesEvento extends AppCompatActivity {
         public EmpleadoWidg(Empleado E, LayoutInflater inflater, ViewGroup parent){
             this.empleado=E;
             view = inflater.inflate(R.layout.empleado_photoview,parent,false);
-            ((TextView)view.findViewById(R.id.nombreTV)).setText(E.Apellido+", "+E.Nombre);
+            ((TextView)view.findViewById(R.id.nombreTV)).setText(E.apellido+", "+E.nombre);
             ImageButton ib = view.findViewById(R.id.photoButton);
             Uri uri = Uri.parse("https://novaclean.com.ar/images/empleados/"+E.foto_url);
             ib.setImageURI(uri);

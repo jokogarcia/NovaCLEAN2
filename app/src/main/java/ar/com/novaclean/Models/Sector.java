@@ -8,6 +8,7 @@ import java.util.ArrayList;
   `tareas` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL*/
 public class Sector {
     public int id;
-    public String Nombre,FotoURL;
+    public String nombre,foto_url;
+    public String tareas;
     public ArrayList<Tarea> Tareas;
 }
