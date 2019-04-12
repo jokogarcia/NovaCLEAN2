@@ -20,21 +20,35 @@
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
     <TextView
-        android:id="@+id/label_dia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="Día"
         android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
     <TextView
-        android:id="@+id/label_hora"
+        android:id="@+id/label_dia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="...."
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="Hora"
         android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+    <TextView
+        android:id="@+id/label_hora"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="10:22"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -46,6 +60,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:text="Empleados Designados"
+
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
             <LinearLayout
                 android:id="@+id/empleadosContainer"
                 android:layout_width="match_parent"
@@ -53,6 +74,13 @@
                 android:orientation="vertical">
 
             </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:text="Tareas"
+
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
             <LinearLayout
                 android:id="@+id/tareasContainer"
                 android:layout_width="match_parent"

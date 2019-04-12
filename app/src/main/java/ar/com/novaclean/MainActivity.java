@@ -48,8 +48,10 @@ public class MainActivity extends AppCompatActivity {
         LogInButton = findViewById(R.id.loginButton);
         ClienteID=0;
         sharedPreferences = getSharedPreferences("Settings",MODE_PRIVATE);
-        ((EditText)findViewById(R.id.userEmail)).setText(sharedPreferences.getString("email","removethisnada"));
-        ((EditText)findViewById(R.id.userPass)).setText(sharedPreferences.getString("pass",""));
+        ((EditText)findViewById(R.id.userEmail)).setText(sharedPreferences.getString("userEmail","removethisnada"));
+        ((EditText)findViewById(R.id.userPass)).setText(sharedPreferences.getString("userPass",""));
+        if(((EditText)findViewById(R.id.userPass)).getText().length()>0)
+            //doLogin();
         LogInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
                             editor.putString("userEmail", email);
                             editor.putString("userPass", pass);
                             editor.putString("token", lr.token);
+                            editor.putString("clientId",String.valueOf(lr.id));
                             Log.d("token",lr.token);
                             if(!editor.commit())
                                 Toast.makeText(getApplicationContext(),"Not commited!",Toast.LENGTH_LONG);

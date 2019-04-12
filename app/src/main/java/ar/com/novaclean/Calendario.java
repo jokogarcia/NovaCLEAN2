@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CalendarView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -50,6 +51,8 @@ public class Calendario extends AppCompatActivity {
         setContentView(R.layout.activity_calendario);
         calendarView= findViewById(R.id.compactcalendar_view);
         clientId=getIntent().getIntExtra("ClienteID",0);
+        String month= new SimpleDateFormat("MMMM").format(calendarView.getFirstDayOfCurrentMonth());
+        ((TextView)findViewById(R.id.mesTV)).setText(month);
         calendarView.setListener(new CompactCalendarView.CompactCalendarViewListener() {
             @Override
             public void onDayClick(Date dateClicked) {
@@ -62,16 +65,16 @@ public class Calendario extends AppCompatActivity {
                     }
                 }
                 if(EventosDelDia.size()==0){
-                    Toast.makeText(getApplicationContext(),"Sin eventos",Toast.LENGTH_SHORT);
+                    Toast.makeText(Calendario.this,"Sin eventos",Toast.LENGTH_LONG).show();
                 }
                 else if(EventosDelDia.size()==1){
                     //Un Solo evento, ir a ese evento;
-                    Intent myIntent = new Intent(getApplicationContext(), DetallesEvento.class);
+                    Intent myIntent = new Intent(Calendario.this, DetallesEvento.class);
                     myIntent.putExtra("Evento",EventosDelDia.get(0));
                     startActivity(myIntent);
                 }
                 else{
-                    Intent myIntent = new Intent(getApplicationContext(), ListaDeEventos.class);
+                    Intent myIntent = new Intent(Calendario.this, ListaDeEventos.class);
                     myIntent.putExtra("Eventos",EventosDelDia);
                     startActivity(myIntent);
                 }
@@ -79,6 +82,8 @@ public class Calendario extends AppCompatActivity {
 
             @Override
             public void onMonthScroll(Date firstDayOfNewMonth) {
+                String month= new SimpleDateFormat("MMMM").format(firstDayOfNewMonth);
+                ((TextView)findViewById(R.id.mesTV)).setText(month);
                 populateCalendario(Itinerario);
             }
         });
@@ -133,12 +138,12 @@ public class Calendario extends AppCompatActivity {
         for (Evento E : itinerario) {
             cal.setFirstDayOfWeek(Calendar.MONDAY);
 
-            if (E.repetible) {
+            if (E.repetible == 1) {
                 int CurrentMonth = cal.get(Calendar.MONTH);
                 char thisDay;
                 cal.setTime(calendarView.getFirstDayOfCurrentMonth());
                 while (cal.get(Calendar.MONTH) == CurrentMonth) {
-                    thisDay = alldays.charAt(cal.get(Calendar.DAY_OF_WEEK));
+                    thisDay = alldays.charAt(cal.get(Calendar.DAY_OF_WEEK)-1);
                     if (E.dias.contains(String.valueOf(thisDay))
                             && E.fecha_inicio.before(cal.getTime())) {
                         //Do Stuff;

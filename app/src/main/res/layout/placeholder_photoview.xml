@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/promoCV"
-    android:layout_width="130dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="20dp"
     app:cardCornerRadius="10dp"
@@ -23,14 +23,13 @@
             android:layout_height="150dp"
             android:layout_weight=".25"
             android:scaleType="centerInside"
-            android:src="@drawable/logonuevo" />
+            android:src="@color/cardview_light_background" />
 
         <TextView
             android:id="@+id/nombreTV"
             android:layout_width="100dp"
             android:textSize="16sp"
-            android:text="Leonardo DiCaprio"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_weight=".75" />
 
     </LinearLayout>
