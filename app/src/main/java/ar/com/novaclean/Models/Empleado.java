@@ -18,6 +18,7 @@ import java.io.Serializable;
   `area` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;*/
 public class Empleado implements Serializable {
+    public int id;
     public String nombre;
     public String apellido;
     public String dni;

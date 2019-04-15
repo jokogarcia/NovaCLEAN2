@@ -9,4 +9,5 @@ public class Constants {
     public static final String GET_EVENTOS_FROM_CLIENTES = BASE_URL + "/getEventosByCliente.php";
     public static final String GET_LUGARES_FROM_CLIENTES = BASE_URL + "/getLugaresByCliente.php";
 
+    public static final int RQTareas = 98436;
 }

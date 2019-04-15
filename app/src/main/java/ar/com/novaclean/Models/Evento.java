@@ -24,6 +24,7 @@ import ar.com.novaclean.MySingleton;
 import static android.content.Context.MODE_PRIVATE;
 
 public class Evento implements Serializable {
+    public int id;
     public String lugar;
     public int repetible;
     public String dias;

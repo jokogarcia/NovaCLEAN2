@@ -148,7 +148,9 @@ public class Calendario extends AppCompatActivity {
                             && E.fecha_inicio.before(cal.getTime())) {
                         //Do Stuff;
                         //Event(new Event(Color.CYAN, cal.getTimeInMillis()));
-                        ExtendedEvents.add(new ExtendedEvent(E,Color.CYAN,cal.getTimeInMillis()));
+                        ExtendedEvent EV= new ExtendedEvent(E,Color.CYAN,cal.getTimeInMillis());
+                        EV.NovaEvent.fecha = cal.getTime();
+                        ExtendedEvents.add(EV);
                     }
                     cal.add(Calendar.DATE, 1);
                 }

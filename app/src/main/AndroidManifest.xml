@@ -11,7 +11,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".DetallesEmpleado"></activity>
+        <activity android:name=".ReclamoPickTarea"></activity>
+        <activity
+            android:name=".Reclamo"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_reclamo"
+            android:theme="@style/FullscreenTheme" />
+        <activity android:name=".Calificar" />
+        <activity android:name=".Observacion1" />
+        <activity android:name=".DetallesEmpleado" />
         <activity android:name=".ListaDeEventos" />
         <activity
             android:name=".DetallesEvento"
