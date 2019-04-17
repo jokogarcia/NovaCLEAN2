@@ -25,17 +25,18 @@ import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
 import ar.com.novaclean.Models.Evento;
+import ar.com.novaclean.Models.ReclamoData;
 import ar.com.novaclean.Models.Tarea;
 
 public class ReclamoPickTarea extends AppCompatActivity {
-    Reclamo.ReclamoData RD;
+    ReclamoData RD;
     Evento EventoActual;
     ArrayList<CheckBox> Checkboxes;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reclamo_pick_tarea);
-        RD = (Reclamo.ReclamoData) getIntent().getSerializableExtra("ReclamoData");
+        RD = (ReclamoData) getIntent().getSerializableExtra("ReclamoData");
         EventoActual = (Evento) getIntent().getSerializableExtra("EventoActual");
         Checkboxes= new ArrayList<>();
         for(Tarea T : EventoActual.Tareas){

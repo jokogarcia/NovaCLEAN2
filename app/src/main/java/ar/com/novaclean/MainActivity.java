@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         ((EditText)findViewById(R.id.userEmail)).setText(sharedPreferences.getString("userEmail","removethisnada"));
         ((EditText)findViewById(R.id.userPass)).setText(sharedPreferences.getString("userPass",""));
         if(((EditText)findViewById(R.id.userPass)).getText().length()>0)
-            //doLogin();
+            doLogin();
         LogInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
