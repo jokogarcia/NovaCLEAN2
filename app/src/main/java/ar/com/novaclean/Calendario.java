@@ -15,8 +15,9 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+
+import com.android.volley.error.VolleyError;
+import com.android.volley.request.StringRequest;
 import com.github.sundeepk.compactcalendarview.CompactCalendarView;
 import com.github.sundeepk.compactcalendarview.domain.Event;
 import com.google.gson.Gson;
@@ -60,8 +61,11 @@ public class Calendario extends AppCompatActivity {
                 ArrayList<Evento> EventosDelDia=new ArrayList<>();
                 for(ExtendedEvent E:ExtendedEvents){
                     for(Event CE:events){
-                        if(CE.equals(E.CalendarEvent))
+                        if(CE.equals(E.CalendarEvent)) {
+                            E.NovaEvent.fecha = dateClicked;
                             EventosDelDia.add(E.NovaEvent);
+
+                        }
                     }
                 }
                 if(EventosDelDia.size()==0){
@@ -149,7 +153,6 @@ public class Calendario extends AppCompatActivity {
                         //Do Stuff;
                         //Event(new Event(Color.CYAN, cal.getTimeInMillis()));
                         ExtendedEvent EV= new ExtendedEvent(E,Color.CYAN,cal.getTimeInMillis());
-                        EV.NovaEvent.fecha = cal.getTime();
                         ExtendedEvents.add(EV);
                     }
                     cal.add(Calendar.DATE, 1);

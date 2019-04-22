@@ -7,8 +7,7 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+
 import com.google.gson.Gson;
 
 import java.io.Serializable;
@@ -35,6 +34,8 @@ public class Evento implements Serializable {
     public String tareas_ids;
     public ArrayList<Tarea> Tareas;
     public String empleados_ids;
+    public int lugar_id;
     public ArrayList<Empleado> EmpleadosDesignados;
+
 
 }

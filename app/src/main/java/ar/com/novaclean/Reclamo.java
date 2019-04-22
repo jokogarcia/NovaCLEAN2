@@ -2,6 +2,7 @@ package ar.com.novaclean;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -18,6 +19,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.error.VolleyError;
+import com.android.volley.request.SimpleMultiPartRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -26,6 +35,7 @@ import java.util.Date;
 import ar.com.novaclean.Models.Constants;
 import ar.com.novaclean.Models.Evento;
 import ar.com.novaclean.Models.ReclamoData;
+
 
 public class Reclamo extends AppCompatActivity {
     enum _State{
@@ -93,7 +103,7 @@ public class Reclamo extends AppCompatActivity {
             case CUMPLIMIENTO://Cumplimiento de objetivos
                 Pregunta.setText("Elija una opción");
                 Button1.setText("Todas los objetivos fueorn cumplidos");
-                Button2.setText("Quedaron tareas sin realizar");
+                Button2.setText("Quedaron tareas sin realizar o incompletas");
                 Button3.setVisibility(View.GONE);
                 RespuestaET.setVisibility(View.GONE);
                 PhotoView.setVisibility(View.GONE);
@@ -168,7 +178,7 @@ public class Reclamo extends AppCompatActivity {
                         break;
                     case R.id.button2:
                         ReclamoData.Comentario=RespuestaET.getText().toString();
-                        Toast.makeText(this,"Enviar no implementado",Toast.LENGTH_LONG).show();
+                        postReclamo(currentPhotoPath,ReclamoData);
                         break;
                 }
             break;
@@ -254,5 +264,57 @@ public class Reclamo extends AppCompatActivity {
                 startActivityForResult(takePictureIntent, Constants.RQTakePhoto);
             }
         }
+    }
+    class ReclamoResponse{
+        public String uploadedFile="";
+        public String newFileName="";
+        public int newReclamoId=-1;
+        public String error="";
+    }
+    private void postReclamo(final String imagePath, ReclamoData reclamo) {
+
+        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST,
+                Constants.URL_POST_RECLAMO,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //Log.d("Response", response);
+                        //{"uploadedFile":"OK","newFileName":"..\/_privado\/imagenes\/reclamos\/6JPEG_20190419_122454_3760847181478474975.jpg","newReclamoId":6,"error":"NONE"}
+                        Gson gson = new Gson();
+                        ReclamoResponse Response = gson.fromJson(response,ReclamoResponse.class);
+                        if(Response.newReclamoId >= 0) {
+                            if (Response.error.equals("NONE")) {
+
+                                /*
+                                setResult(RESULT_OK);
+                                finish();
+                                */
+                            }
+                        }
+                        else{
+                            String error = Response.error + ". Imagen subida: '"+Response.newFileName+"' ID: "+Response.newReclamoId;
+                            Toast.makeText(getApplicationContext(),"ERROR: "+error,Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+        Gson gson  = new Gson();
+        SharedPreferences sharedPreferences = getApplication().getSharedPreferences("Settings", MODE_PRIVATE);
+        String tok = sharedPreferences.getString("token", "");
+        String clientId = sharedPreferences.getString("clientId", "0");
+        String reclamoJSON = gson.toJson(reclamo);
+        smr.addStringParam("reclamo", reclamoJSON);
+        smr.addStringParam("client_id", clientId);
+        smr.addStringParam("tok", tok);
+        smr.addStringParam ("lugar_id",String.valueOf(EventoActual.lugar_id));
+        smr.addFile("foto", imagePath);
+        RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
+        mRequestQueue.add(smr);
+
     }
 }

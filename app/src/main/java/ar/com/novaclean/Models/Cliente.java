@@ -1,5 +1,6 @@
 package ar.com.novaclean.Models;
 /*`id` int(11) NOT NULL,
+cue cue cue
   `creado` timestamp NOT NULL DEFAULT current_timestamp(),
   `modificado` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp(),
   `nombre` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,

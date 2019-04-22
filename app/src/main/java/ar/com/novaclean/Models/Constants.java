@@ -11,4 +11,7 @@ public class Constants {
 
     public static final int RQTareas = 436;
     public static final int RQTakePhoto = 437;
+    public static final String URL_POST_RECLAMO = BASE_URL + "/postReclamo.php";
+    public static final int RQReclamo=438;
+    public static final int RQCalificar=438;
 }

@@ -22,13 +22,15 @@ import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+
+import com.android.volley.error.VolleyError;
+import com.android.volley.request.StringRequest;
 import com.google.gson.Gson;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,9 +65,11 @@ public class DetallesEvento extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent myIntent = new Intent(getApplicationContext(), Observacion1.class);
-                myIntent.putExtra("Evento",EventoActual);
-                startActivity(myIntent);
+
+                    Intent myIntent = new Intent(getApplicationContext(), Observacion1.class);
+                    myIntent.putExtra("Evento",EventoActual);
+                    startActivity(myIntent);
+
             }
         });
         EventoActual = (Evento) getIntent().getSerializableExtra("Evento");

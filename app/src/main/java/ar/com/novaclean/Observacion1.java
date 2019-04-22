@@ -10,6 +10,7 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Date;
 
+import ar.com.novaclean.Models.Constants;
 import ar.com.novaclean.Models.Evento;
 
 public class Observacion1 extends AppCompatActivity {
@@ -19,18 +20,20 @@ public class Observacion1 extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_observacion1);
+
         Button Button1 = findViewById(R.id.obsButton1);
         Button Button2 = findViewById(R.id.obsButton2);
 
         EventoActual = (Evento) getIntent().getSerializableExtra("Evento");
         Date today= new Date();
-        isBefore =(EventoActual.fecha.before(today));
+        isBefore =(EventoActual.fecha.after(today));
         if(isBefore){
             Button1.setText("Solicitar reprogramacion");
             Button2.setVisibility(View.INVISIBLE);
         }
 
-        setContentView(R.layout.activity_observacion1);
+
     }
     public void buttonService(View v){
         switch (v.getId()){
@@ -43,7 +46,7 @@ public class Observacion1 extends AppCompatActivity {
                     //Calificar
                     Intent myIntent = new Intent(getApplicationContext(), Calificar.class);
                     myIntent.putExtra("Evento",EventoActual);
-                    startActivity(myIntent);
+                    startActivityForResult(myIntent,Constants.RQCalificar);
 
                 }
 
@@ -52,10 +55,18 @@ public class Observacion1 extends AppCompatActivity {
                 //Reclamo:
                 Intent myIntent = new Intent(getApplicationContext(), Reclamo.class);
                 myIntent.putExtra("Evento",EventoActual);
-                startActivity(myIntent);
+                startActivityForResult(myIntent, Constants.RQReclamo);
 
                 break;
         }
     }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (resultCode == RESULT_OK)
+            finish();
+
+    }
+
 
 }
