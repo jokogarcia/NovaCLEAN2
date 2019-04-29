@@ -14,4 +14,5 @@ public class Constants {
     public static final String URL_POST_RECLAMO = BASE_URL + "/postReclamo.php";
     public static final int RQReclamo=438;
     public static final int RQCalificar=438;
+    public static final String GET_SECTORES_BY_TAREA = "/getSectoresByTareas.php";
 }

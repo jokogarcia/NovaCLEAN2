@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -117,23 +118,7 @@ public class DetallesEvento extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        //Toast.makeText(MainActivity.this,response,Toast.LENGTH_LONG).show();
-                        Gson g = new Gson();
-                        ArrayList<Tarea> _tareas;
-                        try {
-                            EventoActual.Tareas = new ArrayList<>(Arrays.asList(g.fromJson(response, Tarea[].class)));
-                            for (Tarea t : EventoActual.Tareas) {
-
-                                TareaWidg T = new TareaWidg(t,getLayoutInflater(), TareasContainer);
-                                TareasWidgList.add(T);
-                            }
-                            TareasContainer.removeAllViews();
-                            for (TareaWidg T : TareasWidgList) {
-                                TareasContainer.addView(T.getView());
-                            }
-                        } catch (Exception e) {
-                            Log.d("JOKO", "Error getting tarea. Response: " + response);
-                        }
+                       parseTareasJson(response);
 
                     }
                 },
@@ -159,6 +144,78 @@ public class DetallesEvento extends AppCompatActivity {
         };
         MySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
+    private void populateTareasWidgets(){
+        final ViewGroup TareasContainer = findViewById(R.id.tareasContainer);
+        String eventoAnterior="";
+        for (Tarea t : EventoActual.Tareas) {
+
+            TareaWidg T = new TareaWidg(t,getLayoutInflater(), TareasContainer);
+            TareasWidgList.add(T);
+        }
+        TareasContainer.removeAllViews();
+        for (TareaWidg T : TareasWidgList) {
+            if(eventoAnterior!=T.Tarea.sector){
+                TextView TV = new TextView(getApplicationContext());
+                TV.setText("Sector "+T.Tarea.sector);
+                TareasContainer.addView(TV);
+            }
+            TareasContainer.addView(T.getView());
+        }
+    }
+    private class shortSector{
+        public int id;
+        public String nombre;
+    }
+    private void parseTareasJson(String response) {
+
+        //Toast.makeText(MainActivity.this,response,Toast.LENGTH_LONG).show();
+        Gson g = new Gson();
+        ArrayList<Tarea> _tareas;
+        try {
+            EventoActual.Tareas = new ArrayList<>(Arrays.asList(g.fromJson(response, Tarea[].class)));
+            //Asignar el sector correspondiente a cada tarea.
+
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.GET_SECTORES_BY_TAREA,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            Gson gg = new Gson();
+                            shortSector[] s = gg.fromJson(response,shortSector[].class);
+                            for (int i=0; i<EventoActual.Tareas.size();i++){
+                                EventoActual.Tareas.get(i).sector = s[i].nombre;
+                            }
+                            populateTareasWidgets();
+
+
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d("JOKO", "Error getting tarea. " + error.toString());
+                        }
+                    }) {
+                @Override
+                protected Map<String, String> getParams() {
+                    SharedPreferences sharedPreferences = getApplication().getSharedPreferences("Settings", MODE_PRIVATE);
+                    String tok = sharedPreferences.getString("token", "");
+                    String clientId = sharedPreferences.getString("clientId", "0");
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("client_id", "" + clientId);
+                    params.put("tok", tok);
+                    params.put("tareas_ids", EventoActual.tareas_ids);
+                    return params;
+                }
+
+            };
+            MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+
+
+        } catch (Exception e) {
+            Log.d("JOKO", "Error getting tarea. Response: " + response);
+        }
+    }
+
     private void populateEmpleados() {
         if (EmpleadosWidgList == null)
             EmpleadosWidgList = new ArrayList<>();
