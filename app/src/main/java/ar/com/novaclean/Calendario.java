@@ -7,6 +7,8 @@ import android.provider.CalendarContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CalendarView;
 import android.widget.ProgressBar;
@@ -185,6 +187,29 @@ public class Calendario extends AppCompatActivity {
             this.NovaEvent=E;
             this.CalendarEvent = new Event(Color,t);
         }
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.hamburger, menu);
+        return true;
+    }
+    public void MenuClickEvents(MenuItem menuItem){
+        boolean doFinish=false;
+        switch (menuItem.getItemId()){
+            case R.id.mi_cerrarSesion:
+                SharedPreferences sharedPreferences = getSharedPreferences("Settings", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("iniciarAutomatico", false);
+                if(!editor.commit())
+                    Toast.makeText(getApplicationContext(),"Not commited!",Toast.LENGTH_LONG);
+                doFinish=true;
+                break;
+
+        }
+        if(doFinish)
+            finish();
+
     }
 
 }

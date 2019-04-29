@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.Toast;
 
 
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Evento> Eventos;
     private int ClienteID;
     private Button LogInButton;
+    private Switch IniciarAutomatico;
     private Context ThisActivity;
     private SharedPreferences sharedPreferences;
     @Override
@@ -46,19 +48,19 @@ public class MainActivity extends AppCompatActivity {
         ThisActivity=this;
         setContentView(R.layout.activity_main);
         LogInButton = findViewById(R.id.loginButton);
+        IniciarAutomatico = findViewById(R.id.iniciarAutomatico);
         ClienteID=0;
         sharedPreferences = getSharedPreferences("Settings",MODE_PRIVATE);
-        ((EditText)findViewById(R.id.userEmail)).setText(sharedPreferences.getString("userEmail","removethisnada"));
+        ((EditText)findViewById(R.id.userEmail)).setText(sharedPreferences.getString("userEmail",""));
         ((EditText)findViewById(R.id.userPass)).setText(sharedPreferences.getString("userPass",""));
-        if(((EditText)findViewById(R.id.userPass)).getText().length()>0)
+        IniciarAutomatico.setChecked(sharedPreferences.getBoolean("iniciarAutomatico",false));
+        if(IniciarAutomatico.isChecked())
             doLogin();
         LogInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 doLogin();
-//                Intent myIntent = new Intent(ThisActivity, Calendario.class);
-//                myIntent.putExtra("ClienteID",ClienteID);
-//                startActivity(myIntent);
+
             }
         });
     }
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
                             editor.putString("userEmail", email);
                             editor.putString("userPass", pass);
                             editor.putString("token", lr.token);
+                            editor.putBoolean("iniciarAutomatico",IniciarAutomatico.isChecked());
                             editor.putString("clientId",String.valueOf(lr.id));
                             Log.d("token",lr.token);
                             if(!editor.commit())
@@ -117,5 +120,11 @@ public class MainActivity extends AppCompatActivity {
         public String telefono;
         public String domicilio;
         public String token;
+    }
+
+    @Override
+    protected void onResume() {
+        IniciarAutomatico.setChecked(sharedPreferences.getBoolean("iniciarAutomatico",false));
+        super.onResume();
     }
 }

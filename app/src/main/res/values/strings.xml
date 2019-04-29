@@ -8,4 +8,6 @@
     <string name="title_activity_reclamo">Reclamo</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="logo_novaclean">Logo NovaClean</string>
+    <string name="calendario_de_eventos">Calendario de Eventos</string>
 </resources>

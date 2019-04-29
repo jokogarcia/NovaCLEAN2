@@ -160,8 +160,6 @@ public class DetallesEvento extends AppCompatActivity {
         MySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
     private void populateEmpleados() {
-
-
         if (EmpleadosWidgList == null)
             EmpleadosWidgList = new ArrayList<>();
         EmpleadosWidgList.clear();
@@ -251,6 +249,7 @@ public class DetallesEvento extends AppCompatActivity {
     private class TareaWidg {
         private Tarea Tarea;
         private View view;
+        private String sector;
         public TareaWidg(Tarea T, LayoutInflater inflater, ViewGroup parent){
             this.Tarea=T;
             view = inflater.inflate(R.layout.tarea_fragment,parent,false);
