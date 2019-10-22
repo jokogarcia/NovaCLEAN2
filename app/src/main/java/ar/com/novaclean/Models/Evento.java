@@ -25,15 +25,15 @@ public class Evento implements Serializable {
 
     public String getDias(){
         String retval="";
-        if(this.dias == "LMXJV")
+        if(this.dias.equals("LMXJV"))
             retval="Lunes a Viernes";
-        else if(this.dias == "LMXJVS")
+        else if(this.dias.equals("LMXJVS"))
             retval="Lunes a Sábado";
-        else if(this.dias == "LMXJVSD")
+        else if(this.dias.equals("LMXJVSD"))
             retval="Todos los días";
-        else if(this.dias == "MXJVS")
+        else if(this.dias.equals("MXJVS"))
             retval="Martes a Sábado";
-        else if(this.dias == "MXJVSD")
+        else if(this.dias.equals("MXJVSD"))
             retval="Martes a Domingo";
         else{
             ArrayList<String> DaysArray = new ArrayList<>();
@@ -59,12 +59,14 @@ public class Evento implements Serializable {
             }
             else{
                 int i;
+                StringBuilder builder = new StringBuilder();
                 for(i=0;i<DaysArray.size()-1;i++){
                     if(i!=0)
-                        retval += ", ";
-                    retval+= DaysArray.get(i);
+                        builder.append(", ");
+                    builder.append(DaysArray.get(i));
                 }
-                retval +=" y "+DaysArray.get(i);
+                builder.append(" y "+DaysArray.get(i));
+                retval=builder.toString();
             }
         }
         return retval;
