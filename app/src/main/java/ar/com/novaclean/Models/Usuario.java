@@ -1,4 +1,9 @@
 package ar.com.novaclean.Models;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 /*`id` int(11) NOT NULL,
 cue cue cue
   `creado` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -9,13 +14,19 @@ cue cue cue
   `telefono` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   `domicilio` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL*/
-public class Cliente {
+public class Usuario implements Serializable {
     public int id;
     public String nombre;
     public String apellido;
-    public String cuit;
-    public String telefono;
+    public boolean isEmpleado;
     public String email;
-    public String domicilio;
+    public String token;
+    public String error;
+    public Map<String,String> getLoginParams(){
+        Map<String,String> params = new HashMap<String, String>();
+        params.put("client_id",String.valueOf(this.id));
+        params.put("tok",this.token);
+        return params;
+    }
 
 }

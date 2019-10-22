@@ -3,187 +3,79 @@ package ar.com.novaclean;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.error.VolleyError;
-import com.android.volley.request.SimpleMultiPartRequest;
-import com.android.volley.toolbox.Volley;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+//import com.android.volley.request.SimpleMultiPartRequest;
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
 import ar.com.novaclean.Models.Evento;
 import ar.com.novaclean.Models.ReclamoData;
+import ar.com.novaclean.Models.Usuario;
 
 
 public class Reclamo extends AppCompatActivity {
-    enum _State{
-        INITIAL,
-        PUNTUALIDAD,
-        CALIDAD,
-        CUMPLIMIENTO,
-        COMENTARIO
-
-    }
-    _State State = _State.INITIAL;
     String currentPhotoPath;
     TextView Pregunta;
-    EditText RespuestaET;
     Button Button1;
     Button Button2;
-    Button Button3;
     ReclamoData ReclamoData;
-    ImageView PhotoView;
     Evento EventoActual;
+    Usuario usuario;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventoActual = (Evento) getIntent().getSerializableExtra("Evento");
+        usuario = (Usuario) getIntent().getSerializableExtra("Usuario");
         setContentView(R.layout.activity_reclamo);
         Pregunta = findViewById(R.id.PreguntaTV);
-        RespuestaET = findViewById(R.id.RespuestaET);
         Button1 = findViewById(R.id.button1);
         Button2 = findViewById(R.id.button2);
-        Button3 = findViewById(R.id.button3);
-        PhotoView = findViewById(R.id.PhotoView);
-        PhotoView.setVisibility(View.INVISIBLE);
         ReclamoData = new ReclamoData();
         ReclamoData.EventoId=EventoActual.id;
         ReclamoData.FechaTimestamp=EventoActual.fecha.getTime()/1000;
-        updateGUI();
+
     }
-    void updateGUI(){
-        switch (State){
-            case INITIAL:
-                Pregunta.setText("¿Qué tipo de reclamo desea realizar?");
-                Button1.setText("Puntualidad");
-                Button2.setText("Calidad de servicio");
-                Button2.setText("Cumplimiento de objetivos");
-                RespuestaET.setVisibility(View.GONE);
-                RespuestaET.setVisibility(View.GONE);
-                break;
-            case PUNTUALIDAD:
-                //Puntualidad A
-                Pregunta.setText("En esta ocasión, nuestros representantes fueron");
-                Button1.setText("Puntuales");
-                Button2.setText("Impuntuales (hasta 10'')");
-                Button3.setText("Muy impuntuales (más de 10 minutos)");
-                RespuestaET.setVisibility(View.GONE);
-                PhotoView.setVisibility(View.GONE);
-                break;
-            case CALIDAD://Calidad de servicio
-                Pregunta.setText("Elija una opción");
-                Button1.setText("Todas las tareas se realizaron adecuadamente");
-                Button2.setText("Estoy insatisfecho con una o mas tareas realizadas");
-                Button3.setVisibility(View.GONE);
-                RespuestaET.setVisibility(View.GONE);
-                PhotoView.setVisibility(View.GONE);
-                break;
-            case CUMPLIMIENTO://Cumplimiento de objetivos
-                Pregunta.setText("Elija una opción");
-                Button1.setText("Todas los objetivos fueorn cumplidos");
-                Button2.setText("Quedaron tareas sin realizar o incompletas");
-                Button3.setVisibility(View.GONE);
-                RespuestaET.setVisibility(View.GONE);
-                PhotoView.setVisibility(View.GONE);
-
-                break;
-            case COMENTARIO: //Comentario con foto
-                Pregunta.setText("Puede escribir un comentario con foto");
-                RespuestaET.setVisibility(View.VISIBLE);
-                RespuestaET.setHint("Comentario");
-                PhotoView.setVisibility(View.VISIBLE);
-                Button1.setText("Tomar una foto");
-                Button2.setText("Enviar");
-                Button3.setVisibility(View.GONE);
-                break;
 
 
-        }
-    }
     public void onClick(View v){
-        switch (State){
-            case INITIAL:
-                switch (v.getId()){
-                    case R.id.button1:
-                        ReclamoData.Tipo=1;
-                        State=State.PUNTUALIDAD;
-                        break;
-                    case R.id.button2:
-                        ReclamoData.Tipo=2;
-                        State=State.CALIDAD;
-                        break;
-                    case R.id.button3:
-                        ReclamoData.Tipo=3;
-                        State= State.CUMPLIMIENTO;
-                        break;
-                }
+        Intent intent;
+        switch (v.getId()){
+            case R.id.button1:
+                ReclamoData.Tipo=1;
+                intent = new Intent(getApplicationContext(),reclamo_puntualidad.class);
                 break;
-            case PUNTUALIDAD:
-                switch (v.getId()){
-                    case R.id.button1:
-                        ReclamoData.Detalles="PUNTUAL";
-                        State=State.COMENTARIO;
-                    break;
-                    case R.id.button2:
-                        ReclamoData.Detalles="IMPUNTUAL<10";
-                        State=State.COMENTARIO;
-                    break;
-                    case R.id.button3:
-                        ReclamoData.Detalles="IMPUNTUAL>10";
-                        State=State.COMENTARIO;
-                    break;
-                }
-            break;
-            case CALIDAD:
-            case CUMPLIMIENTO:
-                switch (v.getId()) {
-                    case R.id.button1:
-                        ReclamoData.Detalles = "OK";
-                        State = State.COMENTARIO;
-                        break;
-                    case R.id.button2:
-                        Intent getTareasIntent = new Intent(this, ReclamoPickTarea.class);
-                        getTareasIntent.putExtra("ReclamoData",ReclamoData);
-                        getTareasIntent.putExtra("EventoActual",EventoActual);
-                        startActivityForResult(getTareasIntent, Constants.RQTareas);
-                        break;
-                }
-            break;
-            case COMENTARIO:
-                switch (v.getId()){
-                    case R.id.button1:
-                        dispatchTakePictureIntent();
-                        break;
-                    case R.id.button2:
-                        ReclamoData.Comentario=RespuestaET.getText().toString();
-                        postReclamo(currentPhotoPath,ReclamoData);
-                        break;
-                }
-            break;
+            case R.id.button2:
+                ReclamoData.Tipo=2;
+                intent = new Intent(getApplicationContext(),ReclamoPickTarea.class);
+                intent.putExtra("Evento",EventoActual);
+                break;
+            default:return;
         }
-        updateGUI();
+        intent.putExtra("ReclamoData",ReclamoData);
+        startActivityForResult(intent,Constants.RQReclamoPuntualidad);
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -191,130 +83,163 @@ public class Reclamo extends AppCompatActivity {
         switch(requestCode)
         {
             case Constants.RQTareas:
+            case Constants.RQReclamoPuntualidad:
                 if(resultCode == Activity.RESULT_OK){
                     ReclamoData= (ReclamoData) data.getSerializableExtra("ReclamoData");
-                    State=State.COMENTARIO;
+                    Intent ComentarioIntent = new Intent(getApplicationContext(),ReclamoComentarioYfoto.class);
+                    ComentarioIntent.putExtra("ReclamoData",ReclamoData);
+                    startActivityForResult(ComentarioIntent,Constants.RQComentario);
                 }
                 if (resultCode == Activity.RESULT_CANCELED) {
                     //Write your code if there's no result
 
                 }
-                updateGUI();
                 break;
-            case Constants.RQTakePhoto:
-                // Get the dimensions of the View
-                int targetW = PhotoView.getWidth();
-                int targetH = PhotoView.getHeight();
+            case Constants.RQComentario:
+                if(resultCode == Activity.RESULT_OK){
+                    ReclamoData= (ReclamoData) data.getSerializableExtra("ReclamoData");
+                    String path = (String) data.getSerializableExtra("CurrentPhotoPath");
+                    postReclamo(path,ReclamoData);
+                }
+                if (resultCode == Activity.RESULT_CANCELED) {
+                    //Write your code if there's no result
 
-                // Get the dimensions of the bitmap
-                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-                bmOptions.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
-                int photoW = bmOptions.outWidth;
-                int photoH = bmOptions.outHeight;
-
-                // Determine how much to scale down the image
-                int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-                // Decode the image file into a Bitmap sized to fill the View
-                bmOptions.inJustDecodeBounds = false;
-                bmOptions.inSampleSize = scaleFactor;
-                bmOptions.inPurgeable = true;
-
-                Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, bmOptions);
-                PhotoView.setImageBitmap(bitmap);
+                }
+                break;
 
         }
     }//onActivityResult
 
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
 
-        // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                Log.d("JOKOGARCIA","Error occured while creating the file." +ex.toString());
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "ar.com.novaclean.android.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, Constants.RQTakePhoto);
-            }
-        }
-    }
     class ReclamoResponse{
         public String uploadedFile="";
         public String newFileName="";
         public int newReclamoId=-1;
         public String error="";
     }
-    private void postReclamo(final String imagePath, ReclamoData reclamo) {
+    private void postReclamo(final String imagePath, final ReclamoData reclamo) {
 
-        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST,
-                Constants.URL_POST_RECLAMO,
+        boolean hasImage;
+        /*
+        TODO:
+        if size(imagePath)> 1MB resize image;
+        */
+        try
+        {
+            File f = new File(imagePath);
+            hasImage=f.isFile();
+        }
+        catch (NullPointerException e){
+            hasImage=false;
+        }
+        ShowProgressBar(true);
+        final boolean finalHasImage = hasImage;
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.URL_POST_RECLAMO,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        //Log.d("Response", response);
-                        //{"uploadedFile":"OK","newFileName":"..\/_privado\/imagenes\/reclamos\/6JPEG_20190419_122454_3760847181478474975.jpg","newReclamoId":6,"error":"NONE"}
-                        Gson gson = new Gson();
-                        ReclamoResponse Response = gson.fromJson(response,ReclamoResponse.class);
-                        if(Response.newReclamoId >= 0) {
-                            if (Response.error.equals("NONE")) {
+                            Gson gson = new Gson();
+                            ShowProgressBar(false);
+                            try{
+                                ReclamoResponse Response = gson.fromJson(response,ReclamoResponse.class);
+                                if(Response.newReclamoId >= 0) {
+                                    if (Response.error.equals("NONE")) {
+                                        setResult(RESULT_OK);
+                                        finish();
 
-                                /*
-                                setResult(RESULT_OK);
-                                finish();
-                                */
+                                    }
+                                }
+                                else{
+                                    String error = Response.error + ". Imagen subida: '"
+                                            +Response.newFileName+"' ID: "+Response.newReclamoId;
+                                    Toast.makeText(getApplicationContext(),"ERROR: "
+                                            +error,Toast.LENGTH_LONG).show();
+                                }
+                            }
+                            catch(java.lang.IllegalStateException e){
+                                Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG)
+                                        .show();
+                                return;
                             }
                         }
-                        else{
-                            String error = Response.error + ". Imagen subida: '"+Response.newFileName+"' ID: "+Response.newReclamoId;
-                            Toast.makeText(getApplicationContext(),"ERROR: "+error,Toast.LENGTH_LONG).show();
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            ShowProgressBar(false);
+                            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
                         }
-
-                    }
-                }, new Response.ErrorListener() {
+                    }){
             @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+            protected Map<String,String> getParams(){
+                Map<String,String> params = usuario.getLoginParams();
+
+                Gson gson  = new Gson();
+
+                String reclamoJSON = gson.toJson(reclamo);
+
+                params.put("reclamo",reclamoJSON);
+                params.put("hasImage",String.valueOf(finalHasImage));
+                params.put("lugar_id",String.valueOf(EventoActual.lugar_id));
+                if(finalHasImage){
+                    File imageFile= new File(imagePath);
+                    String image64 = encodeFileToBase64Binary(imageFile);
+                    params.put("foto",image64);
+                    String[] dot = imagePath.split("[.]");
+
+                    params.put("ext",dot[dot.length-1]);
+                }
+                return params;
             }
-        });
-        Gson gson  = new Gson();
-        SharedPreferences sharedPreferences = getApplication().getSharedPreferences("Settings", MODE_PRIVATE);
-        String tok = sharedPreferences.getString("token", "");
-        String clientId = sharedPreferences.getString("clientId", "0");
-        String reclamoJSON = gson.toJson(reclamo);
-        smr.addStringParam("reclamo", reclamoJSON);
-        smr.addStringParam("client_id", clientId);
-        smr.addStringParam("tok", tok);
-        smr.addStringParam ("lugar_id",String.valueOf(EventoActual.lugar_id));
-        smr.addFile("foto", imagePath);
-        RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
-        mRequestQueue.add(smr);
+
+        };
+
+        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+
+
+
+        //TODO: Verificar el tamaño máximo de archivo para evitar errores de subida (https://stackoverflow.com/questions/8053824/ssl-broken-pipe)
+
+    }
+    private static String encodeFileToBase64Binary(File file) {
+        String encodedfile = null;
+        if (file.length() == 0L || file.length() > 1E6)
+            return "ERROR 0";
+        try {
+            FileInputStream fileInputStreamReader = new FileInputStream(file);
+            byte[] bytes = new byte[(int) file.length()];
+            fileInputStreamReader.read(bytes);
+
+            encodedfile = Base64.encodeToString(bytes, Base64.DEFAULT);
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return encodedfile;
+    }
+    private void ShowProgressBar(boolean show){
+        ProgressBar PB = findViewById(R.id.progressBar2);
+        TextView TV3 = findViewById(R.id.textView3);
+        int normalState=View.INVISIBLE;
+        int progresState=View.VISIBLE;
+        if(!show) {
+            normalState = View.VISIBLE;
+            progresState = View.INVISIBLE;
+        }
+        Pregunta.setVisibility(normalState);
+        Button1.setVisibility(normalState);
+        Button2.setVisibility(normalState);
+
+
+        PB.setVisibility(progresState);
+        TV3.setVisibility(progresState);
 
     }
 }

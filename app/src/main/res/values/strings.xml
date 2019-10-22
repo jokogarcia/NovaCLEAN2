@@ -10,4 +10,19 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="logo_novaclean">Logo NovaClean</string>
     <string name="calendario_de_eventos">Calendario de Eventos</string>
+    <string name="titulo_puntualidad">En esta ocasión, nuestros representantes fueron</string>
+    <string name="puntuales">Puntuales</string>
+    <string name="impuntuales">Impuntuales (hasta 10 minutos)</string>
+    <string name="muy_impuntuales">Muy impuntuales (más de 10 min)</string>
+    <string name="comentario">Puede agregar un comentario con foto</string>
+    <string name="tomar_foto">Tomar una foto</string>
+    <string name="enviar">Enviar</string>
+    <string name="que_tipo">¿Qué tipo de reclamo desea realizar?</string>
+    <string name="puntualidad">puntualidad</string>
+    <string name="calidaddeservicio">Calidad de Servicio</string>
+    <string name="enviando_reclamo">Enviando Reclamo</string>
+    <string name="elija_tareas">Elija la o las tareas que desea reportar</string>
+    <string name="fechaDeInicio">Fecha de Inicio</string>
+    <string name="calificacionPromedio">Calificación Promedio</string>
+    <string name="no_events">Sin eventos</string>
 </resources>

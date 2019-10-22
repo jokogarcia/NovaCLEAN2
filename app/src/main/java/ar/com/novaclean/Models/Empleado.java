@@ -1,6 +1,7 @@
 package ar.com.novaclean.Models;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /*`id` int(11) NOT NULL,
   `creado` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -27,4 +28,6 @@ public class Empleado implements Serializable {
     public String foto_url;
     public String puesto;
     public String area;
+    public Date fecha_inicio;
+    public double rating=4.4;
 }

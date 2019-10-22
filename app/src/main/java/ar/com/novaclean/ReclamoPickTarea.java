@@ -3,6 +3,7 @@ package ar.com.novaclean;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,11 +34,12 @@ public class ReclamoPickTarea extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reclamo_pick_tarea);
         RD = (ReclamoData) getIntent().getSerializableExtra("ReclamoData");
-        EventoActual = (Evento) getIntent().getSerializableExtra("EventoActual");
+        EventoActual = (Evento) getIntent().getSerializableExtra("Evento");
         Checkboxes= new ArrayList<>();
         for(Tarea T : EventoActual.Tareas){
             CheckBox CB = new CheckBox(this);
             CB.setText(T.descripcion);
+            CB.setTextColor(Color.WHITE);
             CB.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT));
            Checkboxes.add(CB);
@@ -56,12 +58,13 @@ public class ReclamoPickTarea extends AppCompatActivity {
                     if (CB.isChecked()){
                         SelectedTareasIds.add(EventoActual.Tareas.get(i).id);
                     }
+                    i++;
                 }
                 //return to other activity:
                 RD.Detalles=android.text.TextUtils.join(",",SelectedTareasIds);
                 Intent ReturnIntent = new Intent();
                 ReturnIntent.putExtra("ReclamoData", RD);
-                setResult(Activity.RESULT_OK,ReturnIntent);
+                setResult(Activity.RESULT_OK, ReturnIntent);
                 finish();
                 break;
 
