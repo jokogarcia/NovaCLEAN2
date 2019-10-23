@@ -1,20 +1,22 @@
 package ar.com.novaclean.Models;
 
+import android.util.Log;
+import android.widget.Toast;
+
+import com.android.volley.VolleyError;
+
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-/*`id` int(11) NOT NULL,
-cue cue cue
-  `creado` timestamp NOT NULL DEFAULT current_timestamp(),
-  `modificado` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE current_timestamp(),
-  `nombre` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `apellido` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `cuit` varchar(15) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `telefono` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `domicilio` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL*/
-public class Usuario implements Serializable {
+import ar.com.novaclean.Utils.LoginResultListener;
+import ar.com.novaclean.Utils.RequestCallbackInterface;
+import ar.com.novaclean.Utils.Requester;
+
+
+public class Usuario implements Serializable, RequestCallbackInterface {
     public int id;
     public String nombre;
     public String apellido;
@@ -22,11 +24,33 @@ public class Usuario implements Serializable {
     public String email;
     public String token;
     public String error;
+    private LoginResultListener loginResultListener;
+    private boolean isLoggedIn;
     public Map<String,String> getLoginParams(){
         Map<String,String> params = new HashMap<String, String>();
         params.put("client_id",String.valueOf(this.id));
         params.put("tok",this.token);
         return params;
+    }
+    public void RequestLogin(String password, LoginResultListener loginResultListener){
+        HashMap<String,String> Credentials = new HashMap<String,String>();
+        Credentials.put("email",this.email);
+        Credentials.put("password",password);
+        JSONObject CredentialsJSON=new JSONObject(Credentials);
+        this.loginResultListener=loginResultListener;
+
+        Requester requester = new Requester(this,CredentialsJSON,Constants.LOGIN, 0);
+        requester.queueMe();
+    }
+    @Override
+    public void Callback(int requestCode, JSONObject JSONObject) {
+        Log.d("USERModel",JSONObject.toString());
+    }
+
+    @Override
+    public void ErrorCallback(int requestCode,VolleyError error) {
+        LoginResultListener.LoginResult LoginResult = new LoginResultListener.LoginResult(error);
+        loginResultListener.OnLoginResult(LoginResult);
     }
 
 }
