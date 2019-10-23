@@ -147,7 +147,7 @@ public class Observacion1 extends AppCompatActivity {
         stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
 
     }
 

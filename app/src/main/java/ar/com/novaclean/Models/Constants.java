@@ -1,7 +1,7 @@
 package ar.com.novaclean.Models;
 
 public class Constants {
-    public static final  String BASE_URL="https://novaclean.com.ar/api/";
+    public static final  String BASE_URL="http://192.168.1.11:8000/api/";
     public static final  String GET= BASE_URL + "/get.php";
     public static final  String LOGIN= BASE_URL + "login";
     public static final  String GET_EVENTOS_FROM_LUGARES= BASE_URL + "/getEventosByLugares.php";

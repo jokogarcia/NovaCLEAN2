@@ -128,7 +128,7 @@ public class Calendario extends AppCompatActivity {
             }
 
         };
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
     private void populateCalendario(ArrayList<Evento> itinerario) {

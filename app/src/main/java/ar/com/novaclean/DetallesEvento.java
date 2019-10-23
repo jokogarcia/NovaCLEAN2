@@ -1,7 +1,6 @@
 package ar.com.novaclean;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 
 import android.graphics.Color;
 
@@ -28,11 +27,8 @@ import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
@@ -40,7 +36,6 @@ import ar.com.novaclean.Models.Empleado;
 import ar.com.novaclean.Models.Evento;
 import ar.com.novaclean.Models.Tarea;
 import ar.com.novaclean.Models.Usuario;
-import ar.com.novaclean.Utils.DownloadImageTask;
 
 import static ar.com.novaclean.Utils.UtilsKt.getShortDate;
 
@@ -129,7 +124,7 @@ public class DetallesEvento extends AppCompatActivity
             }
 
         };
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
     private void populateTareasWidgets(){
         final ViewGroup TareasContainer = findViewById(R.id.tareasContainer);
@@ -203,7 +198,7 @@ public class DetallesEvento extends AppCompatActivity
                 }
 
             };
-            MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+            RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
 
 
         } catch (Exception e) {
@@ -263,7 +258,7 @@ public class DetallesEvento extends AppCompatActivity
             }
 
         };
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
 

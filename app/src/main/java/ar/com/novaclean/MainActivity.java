@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,25 +12,18 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import com.google.gson.Gson;
 
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
@@ -53,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThisActivity=this;
+        RequestQueueSingleton dummy = RequestQueueSingleton.getInstance(this);
         setContentView(R.layout.activity_main);
         LogInButton = findViewById(R.id.loginButton);
         IniciarAutomatico = findViewById(R.id.iniciarAutomatico);
@@ -70,6 +63,11 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        //for debug only:
+        ((EditText)findViewById(R.id.userEmail)).setText("admin@example.com");
+        ((EditText)findViewById(R.id.userPass)).setText("password");
+        doLogin();
+
     }
     void doLogin(){
         final String email=((EditText)findViewById(R.id.userEmail)).getText().toString();
@@ -82,8 +80,10 @@ public class MainActivity extends AppCompatActivity {
                 if(loginResult.success){
                     //getEventos(loginResult.user);
                     Intent intent = new Intent(MainActivity.this,ListaDeEventos.class);
+                    Gson gson = new Gson();
+                    String userJSON = gson.toJson(loginResult.user);
                     User user=loginResult.user;
-                    intent.putExtra("user",user);
+                    intent.putExtra("userJSON", user);
                     startActivity(intent);
                 }
                 else{
@@ -146,6 +146,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         };
-        MySingleton.getInstance(this).addToRequestQueue(stringRequest);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 }

@@ -1,6 +1,7 @@
 package ar.com.novaclean.Models
 
 import android.util.Log
+import ar.com.novaclean.MainActivity
 import ar.com.novaclean.Utils.LoginResultListener
 import ar.com.novaclean.Utils.RequestCallbackInterface
 import ar.com.novaclean.Utils.Requester
@@ -61,24 +62,26 @@ class User:Serializable,RequestCallbackInterface{
     override fun Callback(requestCode: Int, JSONObject: JSONObject) {
         when(requestCode){
             0->{
+
                 try{
-                    this.name = JSONObject.getString("name")
-                    this.id= JSONObject.getInt("id");
-                    this.city_id=JSONObject.getInt("city_id");
-                    this.last_name=JSONObject.getString("last_name")
-                    this.dni=JSONObject.getString("dni")
-                    this.phone=JSONObject.getString("phone")
-                    this.cuit=JSONObject.getString("cuit")
-                    this.photo_url=JSONObject.getString("photo_url")
+                    val data = JSONObject.getJSONObject("data")
+                    this.name = data.getString("name")
+                    this.id= data.getInt("id");
+                    this.city_id=data.getInt("city_id");
+                    this.last_name=data.getString("last_name")
+                    this.dni=data.getString("dni")
+                    this.phone=data.getString("phone")
+                    this.cuit=data.getString("cuit")
+                    this.photo_url=data.getString("photo_url")
 
-                    this.birth_date = SimpleDateFormat("yyyy-MM-dd").parse(JSONObject.getString("birth_date"))
-                    this.employee_start_date = SimpleDateFormat("yyyy-MM-dd").parse(JSONObject.getString("birth_date"))
-                    this.created_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(JSONObject.getString("created_at"))
-                    this.updated_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(JSONObject.getString("updated_at"))
+                    this.birth_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("birth_date"))
+                    this.employee_start_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("employee_start_date"))
+                    this.created_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("created_at"))
+                    this.updated_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("updated_at"))
 
-                    this.email =JSONObject.getString("email")
-                    this.api_token=JSONObject.getString("api_token")
-                    this.user_role_id=JSONObject.getInt("user_role_id")
+                    this.email =data.getString("email")
+                    this.api_token=data.getString("api_token")
+                    this.user_role_id=data.getInt("user_role_id")
                     loginResultListener.OnLoginResult(LoginResultListener.LoginResult(true,this))
                 }
                 catch (ex:JSONException){
