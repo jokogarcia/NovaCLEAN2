@@ -5,29 +5,28 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import ar.com.novaclean.Models.Evento
-import ar.com.novaclean.Models.ReclamoData
+import ar.com.novaclean.Models.Complaint
 
 
 class reclamo_puntualidad : AppCompatActivity() {
-    lateinit var Reclamo:ReclamoData
+    lateinit var complaint: Complaint
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reclamo_puntualidad)
-        Reclamo = intent.getSerializableExtra("ReclamoData") as ReclamoData
+        complaint = intent.getSerializableExtra("Complaint") as Complaint
 
 
     }
 
     fun onClick(view: View) {
         when (view.id){
-            R.id.button1->Reclamo.Detalles = "PUNTUAL"
-            R.id.button2->Reclamo.Detalles = "IMPUNTUAL<10"
-            R.id.button3->Reclamo.Detalles = "IMPUNTUAL>10"
+            R.id.button1->complaint.comment = "PUNTUAL"
+            R.id.button2->complaint.comment = "IMPUNTUAL<10"
+            R.id.button3->complaint.comment = "IMPUNTUAL>10"
             else -> return
         }
         var resultIntent = Intent()
-        resultIntent.putExtra("ReclamoData",Reclamo);
+        resultIntent.putExtra("Complaint",complaint);
         setResult(Activity.RESULT_OK,resultIntent);
         finish();
     }

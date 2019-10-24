@@ -1,7 +1,6 @@
 package ar.com.novaclean
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.CardView
@@ -9,7 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import ar.com.novaclean.Models.Evento
+import ar.com.novaclean.Models.VisitEvent
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -26,15 +25,15 @@ private const val ARG_EVENTO = "evento"
  */
 class evento_list_fragment : Fragment() {
     // TODO: Rename and change types of parameters
-    private var evento: Evento? = null
+    private lateinit var visitEvent: VisitEvent
     private var listener: OnFragmentInteractionListener? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            evento = it.getSerializable(ARG_EVENTO) as Evento?
-            //param2 = it.getString(ARG_PARAM2)
+            visitEvent = it.getSerializable(ARG_EVENTO) as VisitEvent
+
         }
 
     }
@@ -47,12 +46,12 @@ class evento_list_fragment : Fragment() {
         val TV2 = root.findViewById<TextView>(R.id.tvEvHora)
         val CV = root.findViewById<CardView>(R.id.cvEvBody)
 
-        evento?.let{
+        visitEvent?.let{
             TV1.text = "Visita de limpieza"
-            TV2.text=it.getHora()
+            TV2.text=it.starts_at.toString()
         }
         CV.setOnClickListener(View.OnClickListener {
-            listener?.onSelectedEvent(evento)
+            listener?.onSelectedEvent(visitEvent)
         })
         return root
 
@@ -86,7 +85,7 @@ class evento_list_fragment : Fragment() {
      * for more information.
      */
     interface OnFragmentInteractionListener {
-         fun onSelectedEvent(evento: Evento?)
+         fun onSelectedEvent(visitEvent: VisitEvent?)
     }
 
     companion object {
@@ -100,7 +99,7 @@ class evento_list_fragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: Evento) =
+        fun newInstance(param1: VisitEvent) =
                 evento_list_fragment().apply {
                     arguments = Bundle().apply {
                         putSerializable(ARG_EVENTO, param1)

@@ -9,7 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import ar.com.novaclean.Models.Empleado
+import ar.com.novaclean.Models.Employee
+import ar.com.novaclean.Models.User
 import ar.com.novaclean.Utils.DownloadImageTask
 
 // TODO: Rename parameter arguments, choose names that match
@@ -26,14 +27,14 @@ private const val ARG_PARAM1 = "empleado"
  */
 class fichaEmpleadoChica : Fragment() {
     // TODO: Rename and change types of parameters
-    private var empleado: Empleado? = null
+    private var employee: User? = null
 
     private var listenerEmpleado: OnEmpleadoFragmentInteractionListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            empleado = it.getSerializable(ARG_PARAM1) as Empleado
+            employee = it.getSerializable(ARG_PARAM1) as User
         }
     }
 
@@ -44,15 +45,15 @@ class fichaEmpleadoChica : Fragment() {
         val imageView = root.findViewById<ImageView>(R.id.ivFotoEmpleado)
         val textView = root.findViewById<TextView>(R.id.tvNombreEmpleado)
         val cardView = root.findViewById<CardView>(R.id.cvEmpleadoFicha)
-        empleado?.let{
+        employee?.let{
             DownloadImageTask(imageView)
-                    .execute("https://novaclean.com.ar/_privado/imagenes/empleados/" + it.foto_url)
-            textView.text=it.nombre + ", " + it.apellido
+                    .execute(it.photo_url)
+            textView.text=it.name + ", " + it.last_name
 
         }
-        if(empleado != null)
+        if(employee != null)
         {
-            cardView.setOnClickListener(View.OnClickListener { listenerEmpleado?.onFragmentInteraction(empleado!!) })
+            cardView.setOnClickListener(View.OnClickListener { listenerEmpleado?.onFragmentInteraction(employee!!) })
         }
 
         return root
@@ -87,7 +88,7 @@ class fichaEmpleadoChica : Fragment() {
      */
     interface OnEmpleadoFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onFragmentInteraction(empleado: Empleado)
+        fun onFragmentInteraction(employee: User)
     }
 
     companion object {
@@ -95,14 +96,14 @@ class fichaEmpleadoChica : Fragment() {
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
          *
-         * @param empleado Parameter 1.
+         * @param employee Parameter 1.
          * @return A new instance of fragment fichaEmpleadoChica.
          */
         @JvmStatic
-        fun newInstance(empleado: Empleado) =
+        fun newInstance(employee: User) =
                 fichaEmpleadoChica().apply {
                     arguments = Bundle().apply {
-                        putSerializable(ARG_PARAM1, empleado)
+                        putSerializable(ARG_PARAM1, employee)
                     }
                 }
     }

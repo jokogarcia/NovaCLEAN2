@@ -33,18 +33,18 @@ import java.util.List;
 import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
-import ar.com.novaclean.Models.Evento;
+import ar.com.novaclean.Models.VisitEvent;
 
 import ar.com.novaclean.Models.Usuario;
 
 public class Calendario extends AppCompatActivity {
     private CompactCalendarView calendarView;
-    private ArrayList<Evento> Itinerario;
+    private ArrayList<VisitEvent> Itinerario;
     private Usuario usuario;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Itinerario = new ArrayList<Evento>();
+        Itinerario = new ArrayList<VisitEvent>();
         setContentView(R.layout.activity_calendario);
         calendarView= findViewById(R.id.compactcalendar_view);
         usuario = (Usuario) getIntent().getSerializableExtra("Usuario");
@@ -56,25 +56,25 @@ public class Calendario extends AppCompatActivity {
             @Override
             public void onDayClick(Date dateClicked) {
                 List<Event> clickedDayEvents = calendarView.getEvents(dateClicked);
-                ArrayList<Evento> EventosDelDia=new ArrayList<>();
+                ArrayList<VisitEvent> thisDaysVisitEvents =new ArrayList<>();
                 for(Event E:clickedDayEvents){
-                    Evento EV = (Evento) E.getData();
-                    EV.fecha = dateClicked;
-                    EventosDelDia.add(EV);
+                    VisitEvent EV = (VisitEvent) E.getData();
+                    EV.date = dateClicked;
+                    thisDaysVisitEvents.add(EV);
                     }
-                if(EventosDelDia.size()==0 && false){
+                if(thisDaysVisitEvents.size()==0 && false){
                     Toast.makeText(Calendario.this,"Sin eventos",Toast.LENGTH_LONG).show();
                 }
-                else if(EventosDelDia.size()==1 && false){
+                else if(thisDaysVisitEvents.size()==1 && false){
                     //Un Solo evento, ir a ese evento;
                     Intent myIntent = new Intent(Calendario.this, DetallesEvento.class);
-                    myIntent.putExtra("Evento",EventosDelDia.get(0));
+                    myIntent.putExtra("VisitEvent", thisDaysVisitEvents.get(0));
                     myIntent.putExtra("Usuario",usuario);
                     startActivity(myIntent);
                 }
                 else{
                     Intent myIntent = new Intent(Calendario.this, ListaDeEventos.class);
-                    myIntent.putExtra("Eventos",EventosDelDia);
+                    myIntent.putExtra("visitEvents", thisDaysVisitEvents);
                     myIntent.putExtra("Usuario",usuario);
                     myIntent.putExtra("Date",dateClicked);
 
@@ -103,10 +103,10 @@ public class Calendario extends AppCompatActivity {
                     public void onResponse(String response) {
                         //Toast.makeText(MainActivity.this,response,Toast.LENGTH_LONG).show();
                         Gson g = new Gson();
-                        Evento[] eventos;
+                        VisitEvent[] visitEvents;
                         try{
-                            eventos = g.fromJson(response, Evento[].class);
-                            Itinerario = new ArrayList<>(Arrays.asList(eventos));
+                            visitEvents = g.fromJson(response, VisitEvent[].class);
+                            Itinerario = new ArrayList<>(Arrays.asList(visitEvents));
                             populateCalendario(Itinerario);
                         }catch(IllegalStateException e){
                             Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG);
@@ -131,7 +131,7 @@ public class Calendario extends AppCompatActivity {
         RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
-    private void populateCalendario(ArrayList<Evento> itinerario) {
+    private void populateCalendario(ArrayList<VisitEvent> itinerario) {
         ArrayList<Event> CalendarEvents= new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
         calendar.setFirstDayOfWeek(Calendar.MONDAY);
@@ -139,9 +139,9 @@ public class Calendario extends AppCompatActivity {
         int currentMonth = calendar.get(Calendar.MONTH);
         while(calendar.get(Calendar.MONTH) == currentMonth){
 
-            for(Evento novaEvent:itinerario){
+            for(VisitEvent novaEvent:itinerario){
                 if(novaEvent.isOnDate(calendar.getTime())) {
-                    int color = novaEvent.repetible == 0 ? Color.MAGENTA : Color.CYAN;
+                    int color = novaEvent.repeats ? Color.MAGENTA : Color.CYAN;
                     Event E = new Event(color, calendar.getTimeInMillis(), novaEvent);
                     CalendarEvents.add(E);
                 }

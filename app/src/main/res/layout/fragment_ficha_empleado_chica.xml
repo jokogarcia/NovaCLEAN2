@@ -27,7 +27,7 @@
                 android:layout_height="120dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="12dp"
-                android:contentDescription="Foto de empleado"
+                android:contentDescription="Foto de employee"
                 tools:src="@tools:sample/avatars" />
 
             <TextView

@@ -20,6 +20,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -27,10 +29,12 @@ import java.util.Date;
 import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
-import ar.com.novaclean.Models.Evento;
+import ar.com.novaclean.Models.VisitEvent;
 import ar.com.novaclean.Models.User;
 import ar.com.novaclean.Models.Usuario;
 import ar.com.novaclean.Utils.LoginResultListener;
+import ar.com.novaclean.Utils.RequestResult;
+import ar.com.novaclean.Utils.RequestResultListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private Switch IniciarAutomatico;
     private Context ThisActivity;
     private SharedPreferences sharedPreferences;
-    private ArrayList<Evento> Itinerario;
+    private ArrayList<VisitEvent> Itinerario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +68,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //for debug only:
-        ((EditText)findViewById(R.id.userEmail)).setText("admin@example.com");
+        ((EditText)findViewById(R.id.userEmail)).setText("ihuel@example.com");
         ((EditText)findViewById(R.id.userPass)).setText("password");
         doLogin();
+        User user = new User();
+        user.Home("", new RequestResultListener() {
+            @Override
+            public void OnRequestResult(@NotNull RequestResult requestResult) {
+
+            }
+        });
 
     }
     void doLogin(){
@@ -78,12 +89,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void OnLoginResult(LoginResult loginResult) {
                 if(loginResult.success){
-                    //getEventos(loginResult.user);
+                    //getVisitEvents(loginResult.user);
                     Intent intent = new Intent(MainActivity.this,ListaDeEventos.class);
-                    Gson gson = new Gson();
-                    String userJSON = gson.toJson(loginResult.user);
-                    User user=loginResult.user;
-                    intent.putExtra("userJSON", user);
+                    intent.putExtra("apiToken", loginResult.user.getApi_token());
                     startActivity(intent);
                 }
                 else{
@@ -111,18 +119,18 @@ public class MainActivity extends AppCompatActivity {
                         //Toast.makeText(MainActivity.this,response,Toast.LENGTH_LONG).show();
                         Gson g = new Gson();
                         try{
-                            Evento[] eventos = g.fromJson(response, Evento[].class);
-                            ArrayList<Evento> EventosTodos = new ArrayList<>(Arrays.asList(eventos));
-                            ArrayList<Evento> EventosDelDia = new ArrayList<>();
+                            VisitEvent[] _visitEvents = g.fromJson(response, VisitEvent[].class);
+                            ArrayList<VisitEvent> visitEvents = new ArrayList<>(Arrays.asList(_visitEvents));
+                            ArrayList<VisitEvent> thisDaysVisitEvents = new ArrayList<>();
                             Date today = new Date();
-                            for (Evento evento : EventosTodos){
-                                if(evento.isOnDate(today)){
-                                    evento.fecha=today;
-                                    EventosDelDia.add(evento);
+                            for (VisitEvent visitEvent : visitEvents){
+                                if(visitEvent.isOnDate(today)){
+                                    visitEvent.date=today;
+                                    thisDaysVisitEvents.add(visitEvent);
                                 }
                             }
                             Intent myIntent = new Intent(MainActivity.this, ListaDeEventos.class);
-                            myIntent.putExtra("Eventos",EventosDelDia);
+                            myIntent.putExtra("visitEvents", thisDaysVisitEvents);
                             myIntent.putExtra("Usuario",usuario);
                             myIntent.putExtra("Date",today);
 

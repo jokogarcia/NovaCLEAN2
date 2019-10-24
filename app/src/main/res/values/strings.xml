@@ -24,5 +24,5 @@
     <string name="elija_tareas">Elija la o las tareas que desea reportar</string>
     <string name="fechaDeInicio">Fecha de Inicio</string>
     <string name="calificacionPromedio">Calificación Promedio</string>
-    <string name="no_events">Sin eventos</string>
+    <string name="no_events">Sin Eventos</string>
 </resources>

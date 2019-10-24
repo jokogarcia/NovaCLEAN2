@@ -4,7 +4,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ViewGroup
-import ar.com.novaclean.Models.Evento
+import ar.com.novaclean.Models.VisitEvent
 import ar.com.novaclean.Models.Usuario
 import java.util.*
 import kotlin.collections.ArrayList
@@ -17,15 +17,14 @@ class EmpleadoHome : AppCompatActivity() , evento_list_fragment.OnFragmentIntera
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_empleado_home)
         usuario = intent.getSerializableExtra("Usuario") as Usuario
-        val EventosDelDia : ArrayList<Evento> = getEventosByUsuario(usuario)
+        val EventosDelDia : ArrayList<VisitEvent> = getEventosByUsuario(usuario)
         populateItinerario(EventosDelDia)
     }
 
-    private fun getEventosByUsuario(usuario: Usuario): ArrayList<Evento> {
-        val eventos = ArrayList<Evento>()
-        val dummy = Evento()
-        dummy.fecha = Date()
-        dummy.lugar = "La casa de Miguel"
+    private fun getEventosByUsuario(usuario: Usuario): ArrayList<VisitEvent> {
+        val eventos = ArrayList<VisitEvent>()
+        val dummy = VisitEvent()
+        dummy.date = Date()
 
         //Todo: Fetch eventos from server
         eventos.add(dummy)
@@ -33,19 +32,19 @@ class EmpleadoHome : AppCompatActivity() , evento_list_fragment.OnFragmentIntera
 
     }
 
-    private fun populateItinerario(eventos: ArrayList<Evento>) {
+    private fun populateItinerario(visitEvents: ArrayList<VisitEvent>) {
         val eventosContainer = findViewById(R.id.eventosContainer) as ViewGroup
         eventosContainer.removeAllViews()
         val transaction = supportFragmentManager.beginTransaction()
-        for(evento:Evento in eventos){
-            transaction.add(R.id.eventosContainer, evento_list_fragment.newInstance(evento))
+        for(visitEvent: VisitEvent in visitEvents){
+            transaction.add(R.id.eventosContainer, evento_list_fragment.newInstance(visitEvent))
         }
         transaction.commit()
     }
 
-    override fun onSelectedEvent(evento: Evento?) {
+    override fun onSelectedEvent(visitEvent: VisitEvent?) {
         val newIntent= Intent(applicationContext,DetallesEvento::class.java)
-        newIntent.putExtra("Evento",evento)
+        newIntent.putExtra("VisitEvent",visitEvent)
         newIntent.putExtra("Usuario", usuario)
 
         startActivity(newIntent)

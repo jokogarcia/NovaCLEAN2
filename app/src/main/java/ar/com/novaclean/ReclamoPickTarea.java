@@ -2,41 +2,32 @@ package ar.com.novaclean;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
-import ar.com.novaclean.Models.Constants;
-import ar.com.novaclean.Models.Evento;
-import ar.com.novaclean.Models.ReclamoData;
-import ar.com.novaclean.Models.Tarea;
+import ar.com.novaclean.Models.Complaint;
+import ar.com.novaclean.Models.VisitEvent;
+import ar.com.novaclean.Models.CleaningTask;
 
 public class ReclamoPickTarea extends AppCompatActivity {
-    ReclamoData RD;
-    Evento EventoActual;
+    Complaint complaint;
+    VisitEvent visitEventCurrent;
     ArrayList<CheckBox> Checkboxes;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reclamo_pick_tarea);
-        RD = (ReclamoData) getIntent().getSerializableExtra("ReclamoData");
-        EventoActual = (Evento) getIntent().getSerializableExtra("Evento");
+        complaint = (Complaint) getIntent().getSerializableExtra("Complaint");
+        visitEventCurrent = (VisitEvent) getIntent().getSerializableExtra("VisitEvent");
         Checkboxes= new ArrayList<>();
-        for(Tarea T : EventoActual.Tareas){
+        for(CleaningTask T : visitEventCurrent.cleaningTasks){
             CheckBox CB = new CheckBox(this);
             CB.setText(T.descripcion);
             CB.setTextColor(Color.WHITE);
@@ -56,14 +47,14 @@ public class ReclamoPickTarea extends AppCompatActivity {
                 int i=0;
                 for(CheckBox CB : Checkboxes){
                     if (CB.isChecked()){
-                        SelectedTareasIds.add(EventoActual.Tareas.get(i).id);
+                        SelectedTareasIds.add(visitEventCurrent.cleaningTasks.get(i).id);
                     }
                     i++;
                 }
                 //return to other activity:
-                RD.Detalles=android.text.TextUtils.join(",",SelectedTareasIds);
+                complaint.comment =android.text.TextUtils.join(",",SelectedTareasIds);
                 Intent ReturnIntent = new Intent();
-                ReturnIntent.putExtra("ReclamoData", RD);
+                ReturnIntent.putExtra("Complaint", complaint);
                 setResult(Activity.RESULT_OK, ReturnIntent);
                 finish();
                 break;

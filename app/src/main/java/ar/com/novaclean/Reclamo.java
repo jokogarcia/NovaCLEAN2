@@ -9,27 +9,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-//import com.android.volley.request.SimpleMultiPartRequest;
-import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
-import ar.com.novaclean.Models.Evento;
-import ar.com.novaclean.Models.ReclamoData;
-import ar.com.novaclean.Models.Usuario;
+import ar.com.novaclean.Models.VisitEvent;
+import ar.com.novaclean.Models.Complaint;
 
 
 public class Reclamo extends AppCompatActivity {
@@ -37,21 +26,22 @@ public class Reclamo extends AppCompatActivity {
     TextView Pregunta;
     Button Button1;
     Button Button2;
-    ReclamoData ReclamoData;
-    Evento EventoActual;
-    Usuario usuario;
+    Complaint Complaint;
+    VisitEvent visitEventCurrent;
+    String apiToken;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EventoActual = (Evento) getIntent().getSerializableExtra("Evento");
-        usuario = (Usuario) getIntent().getSerializableExtra("Usuario");
+        visitEventCurrent = (VisitEvent) getIntent().getSerializableExtra("VisitEvent");
+        apiToken = getIntent().getStringExtra("apiToken");
         setContentView(R.layout.activity_reclamo);
         Pregunta = findViewById(R.id.PreguntaTV);
         Button1 = findViewById(R.id.button1);
         Button2 = findViewById(R.id.button2);
-        ReclamoData = new ReclamoData();
-        ReclamoData.EventoId=EventoActual.id;
-        ReclamoData.FechaTimestamp=EventoActual.fecha.getTime()/1000;
+        Complaint = new Complaint();
+
+        Complaint.visit_event_id= visitEventCurrent.id;
+        Complaint.referenceDate = visitEventCurrent.date;
 
     }
 
@@ -60,17 +50,17 @@ public class Reclamo extends AppCompatActivity {
         Intent intent;
         switch (v.getId()){
             case R.id.button1:
-                ReclamoData.Tipo=1;
+                Complaint.complaint_type =1;
                 intent = new Intent(getApplicationContext(),reclamo_puntualidad.class);
                 break;
             case R.id.button2:
-                ReclamoData.Tipo=2;
+                Complaint.complaint_type =2;
                 intent = new Intent(getApplicationContext(),ReclamoPickTarea.class);
-                intent.putExtra("Evento",EventoActual);
+                intent.putExtra("VisitEvent", visitEventCurrent);
                 break;
             default:return;
         }
-        intent.putExtra("ReclamoData",ReclamoData);
+        intent.putExtra("Complaint", Complaint);
         startActivityForResult(intent,Constants.RQReclamoPuntualidad);
     }
     @Override
@@ -81,9 +71,9 @@ public class Reclamo extends AppCompatActivity {
             case Constants.RQTareas:
             case Constants.RQReclamoPuntualidad:
                 if(resultCode == Activity.RESULT_OK){
-                    ReclamoData= (ReclamoData) data.getSerializableExtra("ReclamoData");
+                    Complaint = (Complaint) data.getSerializableExtra("Complaint");
                     Intent ComentarioIntent = new Intent(getApplicationContext(),ReclamoComentarioYfoto.class);
-                    ComentarioIntent.putExtra("ReclamoData",ReclamoData);
+                    ComentarioIntent.putExtra("Complaint", Complaint);
                     startActivityForResult(ComentarioIntent,Constants.RQComentario);
                 }
                 if (resultCode == Activity.RESULT_CANCELED) {
@@ -93,9 +83,9 @@ public class Reclamo extends AppCompatActivity {
                 break;
             case Constants.RQComentario:
                 if(resultCode == Activity.RESULT_OK){
-                    ReclamoData= (ReclamoData) data.getSerializableExtra("ReclamoData");
+                    Complaint = (Complaint) data.getSerializableExtra("Complaint");
                     String path = (String) data.getSerializableExtra("CurrentPhotoPath");
-                    postReclamo(path,ReclamoData);
+                    postReclamo(path, Complaint);
                 }
                 if (resultCode == Activity.RESULT_CANCELED) {
                     //Write your code if there's no result
@@ -114,90 +104,10 @@ public class Reclamo extends AppCompatActivity {
         public int newReclamoId=-1;
         public String error="";
     }
-    private void postReclamo(final String imagePath, final ReclamoData reclamo) {
-
-        boolean hasImage;
-        /*
-        TODO:
-        if size(imagePath)> 1MB resize image;
-        */
-        try
-        {
-            File f = new File(imagePath);
-            hasImage=f.isFile();
-        }
-        catch (NullPointerException e){
-            hasImage=false;
-        }
-        ShowProgressBar(true);
-        final boolean finalHasImage = hasImage;
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.URL_POST_RECLAMO,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                            Gson gson = new Gson();
-                            ShowProgressBar(false);
-                            try{
-                                ReclamoResponse Response = gson.fromJson(response,ReclamoResponse.class);
-                                if(Response.newReclamoId >= 0) {
-                                    if (Response.error.equals("NONE")) {
-                                        setResult(RESULT_OK);
-                                        finish();
-
-                                    }
-                                }
-                                else{
-                                    String error = Response.error + ". Imagen subida: '"
-                                            +Response.newFileName+"' ID: "+Response.newReclamoId;
-                                    Toast.makeText(getApplicationContext(),"ERROR: "
-                                            +error,Toast.LENGTH_LONG).show();
-                                }
-                            }
-                            catch(java.lang.IllegalStateException e){
-                                Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG)
-                                        .show();
-                                return;
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            ShowProgressBar(false);
-                            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    }){
-            @Override
-            protected Map<String,String> getParams(){
-                Map<String,String> params = usuario.getLoginParams();
-
-                Gson gson  = new Gson();
-
-                String reclamoJSON = gson.toJson(reclamo);
-
-                params.put("reclamo",reclamoJSON);
-                params.put("hasImage",String.valueOf(finalHasImage));
-                params.put("lugar_id",String.valueOf(EventoActual.lugar_id));
-                if(finalHasImage){
-                    File imageFile= new File(imagePath);
-                    String image64 = encodeFileToBase64Binary(imageFile);
-                    params.put("foto",image64);
-                    String[] dot = imagePath.split("[.]");
-
-                    params.put("ext",dot[dot.length-1]);
-                }
-                return params;
-            }
-
-        };
-
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
+    private void postReclamo(final String imagePath, final Complaint reclamo) {
 
 
-
-        //TODO: Verificar el tamaño máximo de archivo para evitar errores de subida (https://stackoverflow.com/questions/8053824/ssl-broken-pipe)
+        //TODO: Implementar
 
     }
     private static String encodeFileToBase64Binary(File file) {

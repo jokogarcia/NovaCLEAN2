@@ -2,6 +2,8 @@ package ar.com.novaclean.Utils;
 
 import com.android.volley.VolleyError;
 
+import java.io.Serializable;
+
 import ar.com.novaclean.Models.User;
 
 public interface LoginResultListener {
@@ -19,6 +21,11 @@ public interface LoginResultListener {
             this.success=false;
             this.user = null;
             this.error = error;
+        }
+        public LoginResult(){
+            this.success=false;
+            this.user = null;
+            this.error = null;
         }
     }
 }

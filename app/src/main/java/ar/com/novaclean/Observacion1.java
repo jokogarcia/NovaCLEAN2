@@ -22,17 +22,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
-import ar.com.novaclean.Models.Evento;
-import ar.com.novaclean.Models.Usuario;
+import ar.com.novaclean.Models.VisitEvent;
 
 
 public class Observacion1 extends AppCompatActivity {
 
-    private Evento EventoActual;
+    private VisitEvent visitEventCurrent;
     boolean isBefore;
     private float calificacion = 2.5f;
     ProgressBar progressBar;
-    private Usuario usuario;
+    private String apiToken;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,12 +47,12 @@ public class Observacion1 extends AppCompatActivity {
                 calificacion = rating;
             }
         });
-        ratingBar.setRating(calificacion);;
+        ratingBar.setRating(calificacion);
 
-        EventoActual = (Evento) getIntent().getSerializableExtra("Evento");
-        usuario = (Usuario)  getIntent().getSerializableExtra("Usuario");
-                Date today= new Date();
-        isBefore =(EventoActual.fecha.after(today));
+        visitEventCurrent = (VisitEvent) getIntent().getSerializableExtra("VisitEvent");
+        apiToken = getIntent().getStringExtra("apiToken");
+        Date today= new Date();
+        isBefore =(visitEventCurrent.date.after(today));
         if(isBefore){
             BotonEnviar.setText("Solicitar reprogramacion");
             BotonReclamo.setVisibility(View.INVISIBLE);
@@ -77,10 +76,10 @@ public class Observacion1 extends AppCompatActivity {
 
                 break;
             case R.id.btReclamo:
-                //Reclamo:
+                //complaint:
                 Intent myIntent = new Intent(getApplicationContext(), Reclamo.class);
-                myIntent.putExtra("Evento",EventoActual);
-                myIntent.putExtra("Usuario", usuario);
+                myIntent.putExtra("VisitEvent", visitEventCurrent);
+                myIntent.putExtra("apiToken", apiToken);
                 startActivityForResult(myIntent, Constants.RQReclamo);
 
                 break;
@@ -136,7 +135,7 @@ public class Observacion1 extends AppCompatActivity {
 
                 params.put("calificacion",((Float)calificacion).toString());
                 params.put("client_id",clientId);
-                params.put("evento_id",String.valueOf(EventoActual.id));
+                params.put("evento_id",String.valueOf(visitEventCurrent.id));
                 params.put("tok",tok);
 
                 return params;

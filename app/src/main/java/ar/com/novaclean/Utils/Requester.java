@@ -10,7 +10,6 @@ import org.json.JSONObject;
 import ar.com.novaclean.RequestQueueSingleton;
 
 public class Requester {
-    JSONObject jsonBody;
     String url;
     RequestCallbackInterface requestCallbackInterface;
     JsonObjectRequest jsonObjectRequest;
@@ -22,6 +21,24 @@ public class Requester {
         this.requestCallbackInterface = client;
         this.requestCode=requestCode;
         jsonObjectRequest = new JsonObjectRequest(this.url, jsonBody,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        client.Callback(requestCode, response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        client.ErrorCallback(requestCode, error);
+                    }
+                });
+    }
+    public Requester(int Method, final RequestCallbackInterface client, JSONObject jsonBody, String url, final int requestCode){
+        this.url =url;
+        this.requestCallbackInterface = client;
+        this.requestCode=requestCode;
+        jsonObjectRequest = new JsonObjectRequest(Method, this.url, jsonBody,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {

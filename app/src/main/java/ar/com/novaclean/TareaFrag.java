@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import ar.com.novaclean.Models.Tarea;
+import ar.com.novaclean.Models.CleaningTask;
 
 
 /**
@@ -24,10 +24,10 @@ import ar.com.novaclean.Models.Tarea;
 public class TareaFrag extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "tarea";
+    private static final String ARG_PARAM1 = "cleaningTask";
 
     // TODO: Rename and change types of parameters
-    private Tarea tarea;
+    private CleaningTask cleaningTask;
 
     private OnFragmentInteractionListener mListener;
 
@@ -39,11 +39,11 @@ public class TareaFrag extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param t Tarea
+     * @param t CleaningTask
      * @return A new instance of fragment TareaFrag.
      */
     // TODO: Rename and change types and number of parameters
-    public static TareaFrag newInstance(Tarea t) {
+    public static TareaFrag newInstance(CleaningTask t) {
         TareaFrag fragment = new TareaFrag();
         Bundle args = new Bundle();
         args.putSerializable(ARG_PARAM1, t);
@@ -55,7 +55,7 @@ public class TareaFrag extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            tarea = (Tarea) getArguments().getSerializable(ARG_PARAM1);
+            cleaningTask = (CleaningTask) getArguments().getSerializable(ARG_PARAM1);
         }
     }
 
@@ -107,6 +107,6 @@ public class TareaFrag extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         TextView T = (TextView) getView().findViewById(R.id.descripcion);
-        T.setText(tarea.descripcion);
+        T.setText(cleaningTask.descripcion);
     }
 }

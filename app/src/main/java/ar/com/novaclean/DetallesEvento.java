@@ -31,10 +31,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import ar.com.novaclean.Models.CleaningTask;
 import ar.com.novaclean.Models.Constants;
-import ar.com.novaclean.Models.Empleado;
-import ar.com.novaclean.Models.Evento;
-import ar.com.novaclean.Models.Tarea;
+import ar.com.novaclean.Models.Employee;
+import ar.com.novaclean.Models.Sector;
+import ar.com.novaclean.Models.User;
+import ar.com.novaclean.Models.VisitEvent;
 import ar.com.novaclean.Models.Usuario;
 
 import static ar.com.novaclean.Utils.UtilsKt.getShortDate;
@@ -42,10 +44,10 @@ import static ar.com.novaclean.Utils.UtilsKt.getShortDate;
 public class DetallesEvento extends AppCompatActivity
         implements fichaEmpleadoChica.OnEmpleadoFragmentInteractionListener {
 
-    private Evento EventoActual;
+    private VisitEvent visitEventCurrent;
     private TextView LabelDia,LabelHora;
     private ArrayList<TareaWidg> TareasWidgList;
-    private Usuario usuario;
+    private String apiToken;
     //TODO: Quitar proteccion de directorio de imagenes, o poner imagenes de empleados en otro directrio.
 
 
@@ -53,24 +55,23 @@ public class DetallesEvento extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle("Visita programada");
-        EventoActual = (Evento) getIntent().getSerializableExtra("Evento");
-        usuario = (Usuario) getIntent().getSerializableExtra("Usuario");
+        visitEventCurrent = (VisitEvent) getIntent().getSerializableExtra("VisitEvent");
+        apiToken = getIntent().getStringExtra("apiToken");
         setContentView(R.layout.activity_detalles_evento);
-        LinearLayout TareasContainer = findViewById(R.id.tareasContainer);
-        LinearLayout EmpleadosContainer = findViewById(R.id.empleadosContainer);
-        TareasWidgList = new ArrayList<TareaWidg>();
+
+        TareasWidgList = new ArrayList<>();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         LabelDia = findViewById(R.id.label_dia);
         LabelHora = findViewById(R.id.label_hora);
-        ImageButton ActionButton = findViewById(R.id.actionButton);
+        ImageButton ActionButton = findViewById(R.id.actionBt);
         ActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 Intent myIntent = new Intent(getApplicationContext(), Observacion1.class);
-                myIntent.putExtra("Evento", EventoActual);
-                myIntent.putExtra("Usuario", usuario);
+                myIntent.putExtra("VisitEvent", visitEventCurrent);
+                myIntent.putExtra("apiToken", apiToken);
 
                 startActivity(myIntent);
 
@@ -79,80 +80,47 @@ public class DetallesEvento extends AppCompatActivity
 
 
 
-        LabelDia.setText(EventoActual.getDias());
-        LabelHora.setText(EventoActual.getHora());
+        LabelDia.setText(visitEventCurrent.getDias());
+        LabelHora.setText(visitEventCurrent.getHora());
         TextView TV = findViewById(R.id.tvFecha);
-        if (EventoActual.repetible == 1) {
-            TV.setText(getShortDate(EventoActual.fecha));
+        if (visitEventCurrent.repeats) {
+            TV.setText(getShortDate(visitEventCurrent.date));
             TV.setVisibility(View.VISIBLE);
         } else
             TV.setVisibility(View.INVISIBLE);
-        populateTareas();
-        populateEmpleados();
+        populateCleaningTasks();
+        populateEmployees();
 
 
     }
-
-    private void populateTareas() {
-
-
+    private void populateCleaningTasks(){
         if (TareasWidgList == null)
             TareasWidgList = new ArrayList<>();
         TareasWidgList.clear();
         final ViewGroup TareasContainer = findViewById(R.id.tareasContainer);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.GET,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                       parseTareasJson(response);
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("JOKO", "Error getting tarea. " + error.toString());
-                    }
-                }) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = usuario.getLoginParams();
-                params.put("field", "tareas");
-                params.put("ids", EventoActual.tareas_ids);
-                return params;
-            }
-
-        };
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
-    }
-    private void populateTareasWidgets(){
-        final ViewGroup TareasContainer = findViewById(R.id.tareasContainer);
-        String eventoAnterior="";
-        for (Tarea t : EventoActual.Tareas) {
+        Sector previousSector=null;
+        for (CleaningTask t : visitEventCurrent.cleaningTasks) {
 
             TareaWidg T = new TareaWidg(t,getLayoutInflater(), TareasContainer);
-            TareasWidgList.add(T);
-        }
-        TareasContainer.removeAllViews();
-        for (TareaWidg T : TareasWidgList) {
-            String eventoActual=T.Tarea.sector;
-            if(!eventoAnterior.equals(eventoActual)){
+
+            if(!t.Sector.equals(previousSector)){
                 TextView TV = new TextView(getApplicationContext());
-                TV.setText("Sector "+T.Tarea.sector);
+                TV.setText("Sector "+t.Sector);
                 TV.setTextColor(Color.WHITE);
                 TareasContainer.addView(TV);
-                eventoAnterior=T.Tarea.sector;
+                previousSector=t.Sector;
             }
             TareasContainer.addView(T.getView());
         }
+
     }
 
+
     @Override
-    public void onFragmentInteraction(@NotNull Empleado empleado) {
+    public void onFragmentInteraction(@NotNull User employee) {
         Intent myIntent = new Intent(this, DetallesEmpleado.class);
-        myIntent.putExtra("Empleado",empleado);
-        myIntent.putExtra("Usuario",usuario);
+        myIntent.putExtra("employee_id", employee.getId());
+        myIntent.putExtra("apiToken", apiToken);
         startActivity(myIntent);
     }
 
@@ -160,120 +128,34 @@ public class DetallesEvento extends AppCompatActivity
         public int id;
         public String nombre;
     }
-    private void parseTareasJson(String response) {
 
-        //Toast.makeText(MainActivity.this,response,Toast.LENGTH_LONG).show();
-        Gson g = new Gson();
-        ArrayList<Tarea> _tareas;
-        try {
-            EventoActual.Tareas = new ArrayList<>(Arrays.asList(g.fromJson(response, Tarea[].class)));
-            //Asignar el sector correspondiente a cada tarea.
+    private void populateEmployees(){
+        ViewGroup Container = findViewById(R.id.empleadosContainer);
+        Container.removeAllViews();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-            StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.GET_SECTORES_BY_TAREA,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            Gson gg = new Gson();
-                            shortSector[] s = gg.fromJson(response,shortSector[].class);
-                            int tmp=EventoActual.Tareas.size();
-                            for (int i=0; i < EventoActual.Tareas.size() && i < s.length;i++){
-                                EventoActual.Tareas.get(i).sector = s[i].nombre;
-                            }
-                            populateTareasWidgets();
-
-
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("JOKO", "Error getting tarea. " + error.toString());
-                        }
-                    }) {
-                @Override
-                protected Map<String, String> getParams() {
-                    Map<String, String> params = usuario.getLoginParams();
-                    params.put("tareas_ids", EventoActual.tareas_ids);
-                    return params;
-                }
-
-            };
-            RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
-
-
-        } catch (Exception e) {
-            Log.d("JOKO", "Error getting tarea. Response: " + response);
+        for (User employee : visitEventCurrent.asignedEmployees){
+            fragmentTransaction.add(R.id.empleadosContainer,
+                    fichaEmpleadoChica.newInstance(employee) );
         }
+        fragmentTransaction.commit();
     }
 
-    private void populateEmpleados() {
-
-        final ViewGroup Container = findViewById(R.id.empleadosContainer);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.GET,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        //Toast.makeText(MainActivity.this,response,Toast.LENGTH_LONG).show();
-                        Gson g = new Gson();
-                        Empleado[] empleados;
-                        View tmp = null;
-                        try {
-
-                            //Convert response into an array of EMPLEADOs
-                            empleados = g.fromJson(response, Empleado[].class);
-
-                            EventoActual.EmpleadosDesignados =
-                                    new ArrayList<>(Arrays.asList(empleados));
-
-
-
-                        } catch (Exception e) {
-                            Log.d("JOKO", "Error getting empleado. Response: " + response +" Exception: "+e.toString());
-                        }
-                        Container.removeAllViews();
-                        FragmentManager fragmentManager = getSupportFragmentManager();
-                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-                        for (Empleado empleado : EventoActual.EmpleadosDesignados){
-                            fragmentTransaction.add(R.id.empleadosContainer,
-                                    fichaEmpleadoChica.newInstance(empleado) );
-                        }
-                        fragmentTransaction.commit();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("JOKO", "Error getting empleado. " + error.toString());
-                    }
-                }) {
-            @Override
-            protected Map<String, String> getParams() {
-
-                Map<String, String> params =usuario.getLoginParams();
-                params.put("field", "empleados");
-                params.put("ids", EventoActual.empleados_ids);
-                return params;
-            }
-
-        };
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
-    }
 
 
 
 
 
     private class TareaWidg {
-        private Tarea Tarea;
+        private CleaningTask CleaningTask;
         private View view;
         private String sector;
-        public TareaWidg(Tarea T, LayoutInflater inflater, ViewGroup parent){
-            this.Tarea=T;
+        public TareaWidg(CleaningTask T, LayoutInflater inflater, ViewGroup parent){
+            this.CleaningTask =T;
             view = inflater.inflate(R.layout.tarea_fragment,parent,false);
             ((TextView)view.findViewById(R.id.TareaDescripcion)).setText(T.descripcion);
-            ((TextView)view.findViewById(R.id.TareaMinutos)).setText(T.minutos+" min");
+            ((TextView)view.findViewById(R.id.TareaMinutos)).setText(T.duration.toString());
         }
         public View getView(){
             return view;

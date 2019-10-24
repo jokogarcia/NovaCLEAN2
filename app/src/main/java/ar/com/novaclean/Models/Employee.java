@@ -14,11 +14,11 @@ import java.util.Date;
   `cv` int(11) NOT NULL,
   `fecha_inicio` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `estado` int(11) NOT NULL,
-  `foto_url` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `photo_url` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `puesto` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `area` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;*/
-public class Empleado implements Serializable {
+public class Employee implements Serializable {
     public int id;
     public String nombre;
     public String apellido;

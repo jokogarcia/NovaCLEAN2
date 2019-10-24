@@ -14,7 +14,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import ar.com.novaclean.Models.Constants
-import ar.com.novaclean.Models.ReclamoData
+import ar.com.novaclean.Models.Complaint
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -23,12 +23,12 @@ import java.util.*
 
 class ReclamoComentarioYfoto : AppCompatActivity() {
 
-    lateinit var Reclamo:ReclamoData
+    lateinit var complaint: Complaint
     private var currentPhotoPath = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reclamo_comentario_yfoto)
-        Reclamo = intent.getSerializableExtra("ReclamoData") as ReclamoData
+        complaint = intent.getSerializableExtra("Complaint") as Complaint
 
     }
 
@@ -37,9 +37,9 @@ class ReclamoComentarioYfoto : AppCompatActivity() {
             R.id.buttonPhoto-> dispatchTakePictureIntent()
             R.id.buttonSend->{
                 val ET = findViewById<EditText>(R.id.ETReclamoComentario)
-                Reclamo.Comentario = ET.text.toString()
+                complaint.comment = ET.text.toString()
                 val ResultIntent = Intent()
-                ResultIntent.putExtra("ReclamoData",Reclamo)
+                ResultIntent.putExtra("Complaint",complaint)
                 ResultIntent.putExtra("CurrentPhotoPath",currentPhotoPath)
                 setResult(Activity.RESULT_OK, ResultIntent)
                 finish()

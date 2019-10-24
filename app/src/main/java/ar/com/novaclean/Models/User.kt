@@ -1,40 +1,18 @@
 package ar.com.novaclean.Models
 
 import android.util.Log
-import ar.com.novaclean.MainActivity
-import ar.com.novaclean.Utils.LoginResultListener
-import ar.com.novaclean.Utils.RequestCallbackInterface
-import ar.com.novaclean.Utils.Requester
+import ar.com.novaclean.Utils.*
+import com.android.volley.Request
 import com.android.volley.VolleyError
+import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 import java.io.Serializable
 import java.util.*
-import com.google.gson.Gson
 import org.json.JSONException
-import java.sql.Time
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
 
-/*  "data": {
-    "id": 1,
-    "city_id": 1438,
-    "name": "Admin",
-    "email": "admin@example.com",
-    "email_verified_at": "2019-10-20 22:28:45",
-    "api_token": "3a282b0c6e3b73bcdc2e6950bafee55e1fc5d68623abf0fa354da73fd279",
-    "user_role_id": 5,
-    "last_name": "Administrador",
-    "dni": "30026473",
-    "phone": "(509) 815-6745 x19485",
-    "cuit": "20-30026473-7",
-    "employee_start_date": "2012-07-02",
-    "birth_date": "1972-05-03",
-    "tcn_state": null,
-    "photo_url": "/images/users/User1.png",
-    "created_at": "2019-10-20 22:28:45",
-    "updated_at": "2019-10-22 18:08:05"
-  }*/
 class User:Serializable,RequestCallbackInterface{
 
 
@@ -54,51 +32,97 @@ class User:Serializable,RequestCallbackInterface{
 
     var email =""
     var api_token=""
-    var user_role_id=0
+    val Locations = mutableListOf<Location>()
+    val City = City()
+    var UserRole = ""
+
     private lateinit var loginResultListener:LoginResultListener
+    private lateinit var requestResultListener: RequestResultListener
+
+    fun fromJSON(jsonObject:JSONObject):Boolean{
+
+        try{
+            val data = jsonObject.getJSONObject("data")
+            this.name = data.getString("name")
+            this.id= data.getInt("id")
+            this.city_id=data.getInt("city_id")
+            this.last_name=data.getString("last_name")
+            this.dni=data.getString("dni")
+            this.phone=data.getString("phone")
+            this.cuit=data.getString("cuit")
+            this.photo_url=data.getString("photo_url")
+
+            this.birth_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("birth_date"))
+            if(data.getString("employee_start_date")!== "null")
+                this.employee_start_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("employee_start_date"))
+            this.created_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("created_at"))
+            this.updated_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("updated_at"))
+
+            this.email =data.getString("email")
+            this.api_token=data.getString("api_token")
+
+            val _UserRole = data.getJSONObject("user_role")
+            this.UserRole=_UserRole.getString("role")
+
+            this.City.fromJson(data.getJSONObject("city"))
+            if(data.has("Locations")){
+                Locations.clear()
+                val jarray = jsonObject.getJSONArray("Locations")
+
+                for (i in 0 until jarray.length()) {
+                    val item = jarray.getJSONObject(i)
+                    val location = Location()
+                    location.fromJson(item)
+                    Locations.add(location)
+                }
+
+            }
 
 
+
+        }
+        catch (ex:JSONException){
+            Log.d("Login", "JSON Exception: $ex")
+            return false
+        }catch (ex:ParseException){
+            Log.d("Login", "Parse Exception: $ex")
+            return false
+        }
+        return true
+    }
 
     override fun Callback(requestCode: Int, JSONObject: JSONObject) {
         when(requestCode){
             0->{
-
-                try{
-                    val data = JSONObject.getJSONObject("data")
-                    this.name = data.getString("name")
-                    this.id= data.getInt("id");
-                    this.city_id=data.getInt("city_id");
-                    this.last_name=data.getString("last_name")
-                    this.dni=data.getString("dni")
-                    this.phone=data.getString("phone")
-                    this.cuit=data.getString("cuit")
-                    this.photo_url=data.getString("photo_url")
-
-                    this.birth_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("birth_date"))
-                    this.employee_start_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("employee_start_date"))
-                    this.created_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("created_at"))
-                    this.updated_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("updated_at"))
-
-                    this.email =data.getString("email")
-                    this.api_token=data.getString("api_token")
-                    this.user_role_id=data.getInt("user_role_id")
+                if(!this.fromJSON(JSONObject))
+                    this.ErrorCallback(requestCode,null)
+                else
                     loginResultListener.OnLoginResult(LoginResultListener.LoginResult(true,this))
+            }
+            1->{
+                if(!this.fromJSON(JSONObject))
+                    requestResultListener.OnRequestResult(RequestResult(null,false))
+                requestResultListener.OnRequestResult(RequestResult(null,true))
+            }
+            2->{
+                if(!this.fromJSON(JSONObject)){
+                    requestResultListener.OnRequestResult(RequestResult(null,false))
                 }
-                catch (ex:JSONException){
-                    ErrorCallback(requestCode,null)
-                }catch (ex:ParseException){
-                    Log.d("Login", "Parse Exception: $ex")
-                    ErrorCallback(requestCode,null)
-                }
-
+                requestResultListener.OnRequestResult(RequestResult(null,true))
             }
         }
-        Log.d("USERModel", JSONObject.toString())
     }
 
     override fun ErrorCallback(requestCode: Int, error: VolleyError?) {
-        val LoginResult = LoginResultListener.LoginResult(error)
-        loginResultListener.OnLoginResult(LoginResult)
+        when(requestCode){
+            0->{
+                val LoginResult = LoginResultListener.LoginResult(error)
+                loginResultListener.OnLoginResult(LoginResult)
+            }
+
+
+
+        }
     }
     fun RequestLogin(password: String, loginResultListener: LoginResultListener) {
         val Credentials = HashMap<String, String>()
@@ -108,6 +132,32 @@ class User:Serializable,RequestCallbackInterface{
         this.loginResultListener = loginResultListener
 
         val requester = Requester(this, CredentialsJSON, Constants.LOGIN, 0)
+        requester.queueMe()
+    }
+    fun Home(apiToken:String, requestResultListener: RequestResultListener){
+        val Credentials = HashMap<String, String>()
+        Credentials["api_token"] = apiToken
+
+        val CredentialsJSON = JSONObject(Credentials)
+        this.requestResultListener = requestResultListener
+        val requester = Requester(Request.Method.GET,this, CredentialsJSON, Constants.USER_HOME, 1)
+        requester.queueMe()
+    }
+
+    fun hasVisitEvents(date: Date): Boolean {
+        for(location:Location in this.Locations){
+            if(!location.visitEvents.isEmpty())
+                return true
+        }
+        return false
+
+    }
+    fun fetchAsEmployee(id:Int, apiToken:String, requestResultListener: RequestResultListener){
+        val Credentials = HashMap<String, String>()
+        Credentials["api_token"] = apiToken
+        val CredentialsJSON = JSONObject(Credentials)
+        this.requestResultListener = requestResultListener
+        val requester = Requester(Request.Method.GET,this, CredentialsJSON, Constants.FETCH_EMPLOYEE, 2)
         requester.queueMe()
     }
 
