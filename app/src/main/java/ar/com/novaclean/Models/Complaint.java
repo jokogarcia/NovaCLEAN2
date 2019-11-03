@@ -33,7 +33,7 @@ public class Complaint implements Serializable,jsonableInterface {
             return false;
         }
         catch ( ParseException ex){
-            Log.d("Login", "Parse Exception: "+ex.toString());
+            Log.d("Login", "Parse Exception in Complaint: "+ex.toString());
             return false;
         }
         return true;

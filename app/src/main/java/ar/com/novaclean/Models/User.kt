@@ -1,10 +1,12 @@
 package ar.com.novaclean.Models
 
 import android.util.Log
+import ar.com.novaclean.RequestQueueSingleton
 import ar.com.novaclean.Utils.*
 import com.android.volley.Request
+import com.android.volley.Response
 import com.android.volley.VolleyError
-import com.android.volley.toolbox.Volley
+import com.android.volley.toolbox.StringRequest
 import org.json.JSONObject
 import java.io.Serializable
 import java.util.*
@@ -13,61 +15,25 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 
 
-class User:Serializable,RequestCallbackInterface{
 
 
-    var id=0
-    var city_id=0
-    var name=""
-    var last_name=""
-    var dni=""
-    var phone=""
-    var cuit=""
-    var photo_url=""
+class User: _user(),RequestCallbackInterface{
 
-    var birth_date:Date? = null
-    var employee_start_date: Date? = null
-    var created_at: Date? = null
-    var updated_at: Date? = null
 
-    var email =""
-    var api_token=""
+
+
+
     val Locations = mutableListOf<Location>()
-    val City = City()
-    var UserRole = ""
-
     private lateinit var loginResultListener:LoginResultListener
     private lateinit var requestResultListener: RequestResultListener
 
-    fun fromJSON(jsonObject:JSONObject):Boolean{
-
+    override fun fromJson(data:JSONObject):Boolean{
+        super.fromJson(data)
         try{
-            val data = jsonObject.getJSONObject("data")
-            this.name = data.getString("name")
-            this.id= data.getInt("id")
-            this.city_id=data.getInt("city_id")
-            this.last_name=data.getString("last_name")
-            this.dni=data.getString("dni")
-            this.phone=data.getString("phone")
-            this.cuit=data.getString("cuit")
-            this.photo_url=data.getString("photo_url")
 
-            this.birth_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("birth_date"))
-            if(data.getString("employee_start_date")!== "null")
-                this.employee_start_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("employee_start_date"))
-            this.created_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("created_at"))
-            this.updated_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("updated_at"))
-
-            this.email =data.getString("email")
-            this.api_token=data.getString("api_token")
-
-            val _UserRole = data.getJSONObject("user_role")
-            this.UserRole=_UserRole.getString("role")
-
-            this.City.fromJson(data.getJSONObject("city"))
-            if(data.has("Locations")){
+            if(data.has("locations")){
                 Locations.clear()
-                val jarray = jsonObject.getJSONArray("Locations")
+                val jarray = data.getJSONArray("locations")
 
                 for (i in 0 until jarray.length()) {
                     val item = jarray.getJSONObject(i)
@@ -82,7 +48,7 @@ class User:Serializable,RequestCallbackInterface{
 
         }
         catch (ex:JSONException){
-            Log.d("Login", "JSON Exception: $ex")
+            Log.d("Login", "JSON Exception in User: $ex")
             return false
         }catch (ex:ParseException){
             Log.d("Login", "Parse Exception: $ex")
@@ -94,23 +60,34 @@ class User:Serializable,RequestCallbackInterface{
     override fun Callback(requestCode: Int, JSONObject: JSONObject) {
         when(requestCode){
             0->{
-                if(!this.fromJSON(JSONObject))
+                try{
+                    val data = JSONObject.getJSONObject("data")
+                    if(!this.fromJson(data))
+                        this.ErrorCallback(requestCode,null)
+                    else
+                        loginResultListener.OnLoginResult(LoginResultListener.LoginResult(true,this))
+                } catch (ex:JSONException){
+                    Log.d("Login", "JSON Exception in User Login: $ex")
                     this.ErrorCallback(requestCode,null)
-                else
-                    loginResultListener.OnLoginResult(LoginResultListener.LoginResult(true,this))
+                }
+
             }
             1->{
-                if(!this.fromJSON(JSONObject))
+                if(!this.fromJson(JSONObject))
                     requestResultListener.OnRequestResult(RequestResult(null,false))
                 requestResultListener.OnRequestResult(RequestResult(null,true))
             }
             2->{
-                if(!this.fromJSON(JSONObject)){
+                if(!this.fromJson(JSONObject)){
                     requestResultListener.OnRequestResult(RequestResult(null,false))
                 }
                 requestResultListener.OnRequestResult(RequestResult(null,true))
             }
         }
+    }
+    override fun Callback(requestCode: Int, string: String?) {
+        val jo = JSONObject(string);
+        Callback(requestCode,jo);
     }
 
     override fun ErrorCallback(requestCode: Int, error: VolleyError?) {
@@ -118,6 +95,10 @@ class User:Serializable,RequestCallbackInterface{
             0->{
                 val LoginResult = LoginResultListener.LoginResult(error)
                 loginResultListener.OnLoginResult(LoginResult)
+            }
+            1->{
+                Log.d("HOME","Volley error: $error")
+                requestResultListener.OnRequestResult(RequestResult(error,false))
             }
 
 
@@ -134,20 +115,60 @@ class User:Serializable,RequestCallbackInterface{
         val requester = Requester(this, CredentialsJSON, Constants.LOGIN, 0)
         requester.queueMe()
     }
+
     fun Home(apiToken:String, requestResultListener: RequestResultListener){
         val Credentials = HashMap<String, String>()
         Credentials["api_token"] = apiToken
 
         val CredentialsJSON = JSONObject(Credentials)
-        this.requestResultListener = requestResultListener
-        val requester = Requester(Request.Method.GET,this, CredentialsJSON, Constants.USER_HOME, 1)
-        requester.queueMe()
+        if(true)
+        {
+
+            this.requestResultListener = requestResultListener
+            //val requester = Requester(Request.Method.GET,this, CredentialsJSON, Constants.USER_HOME, 1)
+            val requester = Requester(Request.Method.GET,this, CredentialsJSON, Constants.USER_HOME, 1,apiToken)
+            requester.queueMe()
+        }
+        else{
+            val stringRequest = object: StringRequest(Request.Method.GET,Constants.USER_HOME,
+                  object: Response.Listener<String>{
+                      override fun onResponse(response: String?) {
+                          Log.d("Response",response)
+                      }
+
+                  },
+                    object : Response.ErrorListener{
+                        override fun onErrorResponse(error: VolleyError?) {
+                            Log.d("Error",error.toString())
+                        }
+                    }){
+                override fun getHeaders(): Map<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers.put("Content-Type", "application/json")
+                    headers.put("Accept","application/json")
+                    headers.put("Authorization","Bearer $apiToken")
+
+                    return headers
+                }
+
+
+            }
+
+
+            RequestQueueSingleton.getContextlessInstance().addToRequestQueue<String>(stringRequest)
+
+        }
+
+
     }
 
     fun hasVisitEvents(date: Date): Boolean {
         for(location:Location in this.Locations){
-            if(!location.visitEvents.isEmpty())
-                return true
+            if(location.visitEvents!= null && !location.visitEvents.isEmpty())
+                for(visitEvent in location.visitEvents){
+                    if(visitEvent.isOnDate(date))
+                        return true;
+                }
         }
         return false
 

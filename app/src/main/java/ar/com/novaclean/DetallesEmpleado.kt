@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 
-import ar.com.novaclean.Models.Employee
+
 import ar.com.novaclean.Models.User
 import ar.com.novaclean.Utils.DownloadImageTask
 import ar.com.novaclean.Utils.RequestResult

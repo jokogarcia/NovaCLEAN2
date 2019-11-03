@@ -27,7 +27,7 @@ public class VisitEvent implements Serializable,jsonableInterface {
     public Time duration;
     public Date date;
     public ArrayList<CleaningTask> cleaningTasks;
-    public ArrayList<User> asignedEmployees;
+    public ArrayList<_user> asignedEmployees;
     public boolean monday;
     public boolean tuesday;
     public boolean wednesday;
@@ -36,32 +36,41 @@ public class VisitEvent implements Serializable,jsonableInterface {
     public boolean saturday;
     public boolean sunday;
 
-
     @Override
     public boolean fromJson(@NotNull JSONObject jsonObject) {
         try{
             this.id = jsonObject.getInt("id");
-            this.repeats  = jsonObject.getBoolean("repeats");
+            this.repeats  = jsonObject.getInt("repeats")!=0;
             this.starting_date =  new SimpleDateFormat("yyyy-MM-dd").parse(jsonObject.getString("starting_date"));
             this.duration = Time.valueOf(jsonObject.getString("duration"));
+            this.starts_at = Time.valueOf(jsonObject.getString("starts_at"));
             this.date =  new SimpleDateFormat("yyyy-MM-dd").parse(jsonObject.getString("date"));
-            this.monday  = jsonObject.getBoolean("monday");
-            this.tuesday  = jsonObject.getBoolean("tuesday");
-            this.wednesday  = jsonObject.getBoolean("wednesday");
-            this.thursday  = jsonObject.getBoolean("thursday");
-            this.friday  = jsonObject.getBoolean("friday");
-            this.saturday  = jsonObject.getBoolean("saturday");
-            this.sunday  = jsonObject.getBoolean("sunday");
+            this.monday  = jsonObject.getInt("monday")!=0;
+            this.tuesday  = jsonObject.getInt("tuesday")!=0;
+            this.wednesday  = jsonObject.getInt("wednesday")!=0;
+            this.thursday  = jsonObject.getInt("thursday")!=0;
+            this.friday  = jsonObject.getInt("friday")!=0;
+            this.saturday  = jsonObject.getInt("saturday")!=0;
+            this.sunday  = jsonObject.getInt("sunday")!=0;
 
 
 
-            JSONArray jarray = jsonObject.getJSONArray("Tasks");
+            JSONArray jarray = jsonObject.getJSONArray("tasks");
             cleaningTasks = new ArrayList<>();
             for(int i=0;i<jarray.length();i++){
                 JSONObject item = jarray.getJSONObject(i);
-                CleaningTask VE = new CleaningTask();
-                VE.fromJson(item);
-                cleaningTasks.add(VE);
+                CleaningTask cleaningTask = new CleaningTask();
+                cleaningTask.fromJson(item);
+                cleaningTasks.add(cleaningTask);
+            }
+            jarray = jsonObject.getJSONArray("assigned_employees");
+
+            this.asignedEmployees = new ArrayList<>();
+            for(int i=0;i<jarray.length();i++){
+                JSONObject item = jarray.getJSONObject(i);
+                _user user = new _user();
+                user.fromJson(item);
+                asignedEmployees.add(user);
             }
 
 
@@ -81,6 +90,9 @@ public class VisitEvent implements Serializable,jsonableInterface {
 
     public String getDias(){
         String retval="";
+        if(!repeats){
+            return this.date.toString();
+        }
         if(monday &&
                 tuesday &&
                 wednesday &&
@@ -136,9 +148,12 @@ public class VisitEvent implements Serializable,jsonableInterface {
                 sArray.add("Sábado");
             if(sunday)
                 sArray.add("Domingo");
+            if(sArray.size()==0){
+                return "";
+            }
             StringBuilder builder = new StringBuilder();
             int i;
-            for (i=0;i<sArray.size()-1;i++) {
+            for (i=0;i<sArray.size()-2;i++) {
                 if(i!=0)
                     builder.append(", ");
                 builder.append(sArray.get(i));
@@ -164,17 +179,16 @@ public class VisitEvent implements Serializable,jsonableInterface {
     }
 
     public boolean isOnDate(Date time){
-        Calendar dateToCheck = Calendar.getInstance();
-        Calendar EventsDate = Calendar.getInstance();
-
-        dateToCheck.setTime(time);
-        EventsDate.setTime(this.date);
-        if(this.repeats){
-            return dateToCheck.get(Calendar.DAY_OF_YEAR) == EventsDate.get(Calendar.DAY_OF_YEAR) &&
-                    dateToCheck.get(Calendar.YEAR) == EventsDate.get(Calendar.YEAR);
+        if(!this.repeats){
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+            return (fmt.format(this.date).equals(fmt.format(time)));
+            /*return dateToCheck.get(Calendar.DAY_OF_YEAR) == EventsDate.get(Calendar.DAY_OF_YEAR) &&
+                    dateToCheck.get(Calendar.YEAR) == EventsDate.get(Calendar.YEAR);*/
         }
         else if(this.starting_date.before(time))
         {
+            Calendar dateToCheck = Calendar.getInstance();
+            dateToCheck.setTime(time);
             switch(dateToCheck.get(Calendar.DAY_OF_WEEK)){
                 case 1: return sunday;
                 case 2: return monday;

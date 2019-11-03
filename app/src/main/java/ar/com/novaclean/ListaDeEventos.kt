@@ -13,6 +13,7 @@ import ar.com.novaclean.Models.User
 import ar.com.novaclean.Utils.RequestResult
 import ar.com.novaclean.Utils.RequestResultListener
 import ar.com.novaclean.Utils.getLongDate
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_lista_de_eventos.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -67,8 +68,12 @@ class ListaDeEventos : AppCompatActivity(),evento_list_fragment.OnFragmentIntera
 
     override fun onSelectedEvent(visitEvent: VisitEvent?) {
         val newIntent= Intent(applicationContext,DetallesEvento::class.java)
-        newIntent.putExtra("VisitEvent",visitEvent)
-        newIntent.putExtra("user", user)
+        val gson = Gson();
+        val visitEventJson = gson.toJson(visitEvent)
+        newIntent.putExtra("VisitEventJson",visitEventJson);
+        //newIntent.putExtra("VisitEven",visitEvent)
+
+        newIntent.putExtra("apiToken", user.api_token)
 
         startActivity(newIntent)
     }
@@ -76,7 +81,9 @@ class ListaDeEventos : AppCompatActivity(),evento_list_fragment.OnFragmentIntera
     fun onButtonClick(view: View) {
         if(view.id == R.id.ibCalendar){
             val calendarioIntent = Intent(this,Calendario::class.java)
-            calendarioIntent.putExtra("Usuario",user);
+            val gson= Gson()
+            val userJson=gson.toJson(user)
+            calendarioIntent.putExtra("user",userJson)
             startActivity(calendarioIntent)
         }
         else if(view.id == R.id.ibNew){

@@ -31,7 +31,6 @@ import java.util.Map;
 import ar.com.novaclean.Models.Constants;
 import ar.com.novaclean.Models.VisitEvent;
 import ar.com.novaclean.Models.User;
-import ar.com.novaclean.Models.Usuario;
 import ar.com.novaclean.Utils.LoginResultListener;
 import ar.com.novaclean.Utils.RequestResult;
 import ar.com.novaclean.Utils.RequestResultListener;
@@ -68,16 +67,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //for debug only:
-        ((EditText)findViewById(R.id.userEmail)).setText("ihuel@example.com");
+        ((EditText)findViewById(R.id.userEmail)).setText("jackeline12@example.net");
         ((EditText)findViewById(R.id.userPass)).setText("password");
         doLogin();
-        User user = new User();
-        user.Home("", new RequestResultListener() {
-            @Override
-            public void OnRequestResult(@NotNull RequestResult requestResult) {
-
-            }
-        });
 
     }
     void doLogin(){
@@ -111,49 +103,5 @@ public class MainActivity extends AppCompatActivity {
         IniciarAutomatico.setChecked(sharedPreferences.getBoolean("iniciarAutomatico",false));
         super.onResume();
     }
-    private void getEventos(final Usuario usuario) {
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.GET_EVENTOS_FROM_USER,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        //Toast.makeText(MainActivity.this,response,Toast.LENGTH_LONG).show();
-                        Gson g = new Gson();
-                        try{
-                            VisitEvent[] _visitEvents = g.fromJson(response, VisitEvent[].class);
-                            ArrayList<VisitEvent> visitEvents = new ArrayList<>(Arrays.asList(_visitEvents));
-                            ArrayList<VisitEvent> thisDaysVisitEvents = new ArrayList<>();
-                            Date today = new Date();
-                            for (VisitEvent visitEvent : visitEvents){
-                                if(visitEvent.isOnDate(today)){
-                                    visitEvent.date=today;
-                                    thisDaysVisitEvents.add(visitEvent);
-                                }
-                            }
-                            Intent myIntent = new Intent(MainActivity.this, ListaDeEventos.class);
-                            myIntent.putExtra("visitEvents", thisDaysVisitEvents);
-                            myIntent.putExtra("Usuario",usuario);
-                            myIntent.putExtra("Date",today);
 
-                            startActivity(myIntent);
-
-                        }catch(IllegalStateException e){
-                            Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG);
-                        }
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainActivity.this,error.toString(),Toast.LENGTH_LONG).show();
-                    }
-                }){
-            @Override
-            protected Map<String,String> getParams(){
-                return usuario.getLoginParams();
-            }
-
-        };
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
-    }
 }

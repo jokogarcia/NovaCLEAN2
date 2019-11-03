@@ -17,12 +17,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 
+import org.json.JSONObject;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import ar.com.novaclean.Models.Constants;
 import ar.com.novaclean.Models.VisitEvent;
+import ar.com.novaclean.Utils.RequestCallbackInterface;
+import ar.com.novaclean.Utils.Requester;
 
 
 public class Observacion1 extends AppCompatActivity {
@@ -32,6 +36,8 @@ public class Observacion1 extends AppCompatActivity {
     private float calificacion = 2.5f;
     ProgressBar progressBar;
     private String apiToken;
+    private int userId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,63 +96,43 @@ public class Observacion1 extends AppCompatActivity {
         public String error="";
     }
     private void enviarCalificacion() {
+        HashMap<String,String> params = new HashMap<String, String>();
+
+        RatingBar ratingBar = findViewById(R.id.ratingBar);
+        float raiting = ratingBar.getRating();
+        params.put("visit_event_id",String.valueOf(visitEventCurrent.id));
+        //params.put("reference_date",String.valueOf(visitEventCurrent.date));
+        params.put("reference_date","2017-05-06");
+        params.put("raiting",String.valueOf(raiting));
+
+        JSONObject paramsJsonObject = new JSONObject(params);
+
+
         progressBar.setVisibility(View.VISIBLE);
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.URL_POST_CALIFICACION,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Gson gson = new Gson();
-                        progressBar.setVisibility(View.INVISIBLE);
-                        try{
-                            CalificacionResponse Response = gson.fromJson(response, CalificacionResponse.class);
-                            if(Response.newReclamoId >= 0) {
-                                if (Response.error.equals("NONE")) {
-                                    setResult(RESULT_OK);
-                                    finish();
-                                }
-                            }
-                            else{
-                                String error = Response.error;
-                                Toast.makeText(getApplicationContext(),"ERROR: "
-                                        +error,Toast.LENGTH_LONG).show();
-                            }
-                        }
-                        catch(java.lang.IllegalStateException e){
-                            Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG)
-                                    .show();
-                            return;
-                        }
-                    }
-                }, new Response.ErrorListener() {
+        Requester requester = new Requester(Request.Method.POST, new RequestCallbackInterface() {
             @Override
-            public void onErrorResponse(VolleyError error) {
+            public void Callback(int requestCode, JSONObject JSONObject) {
+                Toast.makeText(getApplicationContext(),"OK",Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
+                finish();
+            }
+
+            @Override
+            public void Callback(int requestCode, String string) {
+                Toast.makeText(getApplicationContext(),"OK String",Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
+                finish();
+            }
+
+            @Override
+            public void ErrorCallback(int requestCode, VolleyError error) {
                 progressBar.setVisibility(View.INVISIBLE);
-                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),"Error "+error.getMessage(),Toast.LENGTH_SHORT).show();
+
             }
-        }){
-            @Override
-            protected Map<String,String> getParams(){
-                Map<String,String> params = new HashMap<String, String>();
+        },paramsJsonObject,Constants.URL_POST_RAITING,0,apiToken);
+        requester.queueMe();
 
-                SharedPreferences sharedPreferences = getApplication().getSharedPreferences("Settings", MODE_PRIVATE);
-                String tok = sharedPreferences.getString("token", "");
-                String clientId = sharedPreferences.getString("clientId", "0");
-
-
-                params.put("calificacion",((Float)calificacion).toString());
-                params.put("client_id",clientId);
-                params.put("evento_id",String.valueOf(visitEventCurrent.id));
-                params.put("tok",tok);
-
-                return params;
-            }
-
-        };
-
-        stringRequest.setRetryPolicy(new DefaultRetryPolicy(10000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
 
     }
 

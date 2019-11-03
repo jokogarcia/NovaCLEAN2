@@ -2,15 +2,12 @@ package ar.com.novaclean.Models;
 
 import android.util.Log;
 
-import com.google.gson.JsonArray;
-
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.ArrayList;
 
 /*`id` int(11) NOT NULL,
@@ -36,15 +33,14 @@ public class Location implements Serializable,jsonableInterface {
     public String address_floor;
     public String address_appartment;
     public String phone_number;
-    public String email;
-    public String local_contact;
+    public String local_contact_name;
     public String local_contact_email;
     public String local_contact_phone;
     public String photo_url;
     public double latitude;
     public double longitude;
     public String contract_number;
-    public User Supervisor;
+    public _user Supervisor;
 
     public ArrayList<VisitEvent> visitEvents;
     public ArrayList<Sector> sectors;
@@ -58,31 +54,26 @@ public class Location implements Serializable,jsonableInterface {
             this.address_floor = jsonObject.getString("address_floor");
             this.address_appartment = jsonObject.getString("address_appartment");
             this.phone_number = jsonObject.getString("phone_number");
-            this.email = jsonObject.getString("email");
-            this.local_contact = jsonObject.getString("local_contact");
+            this.local_contact_name = jsonObject.getString("local_contact_name");
             this.local_contact_email = jsonObject.getString("local_contact_email");
             this.local_contact_phone = jsonObject.getString("local_contact_phone");
             this.contract_number = jsonObject.getString("contract_number");
             this.name = jsonObject.getString("name");
             this.latitude = jsonObject.getDouble("latitude");
             this.longitude = jsonObject.getDouble("longitude");
-            this.Supervisor = new User();
-            this.Supervisor.fromJSON(jsonObject.getJSONObject("Supervisor"));
-            this.visitEvents = new ArrayList<>();
-
+            this.Supervisor = new _user();
+            this.Supervisor.fromJson(jsonObject.getJSONObject("supervisor"));
             this.photo_url = jsonObject.getString("photo_url");
-
-            JSONArray jarray = jsonObject.getJSONArray("VisitEvents");
-            visitEvents.clear();
+            this.visitEvents = new ArrayList<>();
+            sectors = new ArrayList<>();
+            JSONArray jarray = jsonObject.getJSONArray("visit_events");
             for(int i=0;i<jarray.length();i++){
                 JSONObject item = jarray.getJSONObject(i);
                 VisitEvent VE = new VisitEvent();
                 VE.fromJson(item);
                 visitEvents.add(VE);
             }
-
-            jarray = jsonObject.getJSONArray("Sectors");
-            sectors.clear();
+            jarray = jsonObject.getJSONArray("sectors");
             for(int i=0;i<jarray.length();i++){
                 JSONObject item = jarray.getJSONObject(i);
                 Sector SE = new Sector();
@@ -90,7 +81,7 @@ public class Location implements Serializable,jsonableInterface {
                 sectors.add(SE);
             }
         }catch ( JSONException ex){
-            Log.d("Login", "JSON Exception: "+ex.toString());
+            Log.d("Login", "JSON Exception in Location id "+this.id+": "+ex.toString());
             return false;
         }
 

@@ -9,8 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import ar.com.novaclean.Models.Employee
 import ar.com.novaclean.Models.User
+import ar.com.novaclean.Models._user
 import ar.com.novaclean.Utils.DownloadImageTask
 
 // TODO: Rename parameter arguments, choose names that match
@@ -27,14 +27,14 @@ private const val ARG_PARAM1 = "empleado"
  */
 class fichaEmpleadoChica : Fragment() {
     // TODO: Rename and change types of parameters
-    private var employee: User? = null
+    private var employee: _user? = null
 
     private var listenerEmpleado: OnEmpleadoFragmentInteractionListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            employee = it.getSerializable(ARG_PARAM1) as User
+            employee = it.getSerializable(ARG_PARAM1) as _user
         }
     }
 
@@ -88,7 +88,7 @@ class fichaEmpleadoChica : Fragment() {
      */
     interface OnEmpleadoFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onFragmentInteraction(employee: User)
+        fun onFragmentInteraction(employee: _user)
     }
 
     companion object {
@@ -100,7 +100,7 @@ class fichaEmpleadoChica : Fragment() {
          * @return A new instance of fragment fichaEmpleadoChica.
          */
         @JvmStatic
-        fun newInstance(employee: User) =
+        fun newInstance(employee: _user) =
                 fichaEmpleadoChica().apply {
                     arguments = Bundle().apply {
                         putSerializable(ARG_PARAM1, employee)

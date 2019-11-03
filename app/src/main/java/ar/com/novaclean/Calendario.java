@@ -15,42 +15,39 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.github.sundeepk.compactcalendarview.CompactCalendarView;
 import com.github.sundeepk.compactcalendarview.domain.Event;
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
 import java.util.List;
-import java.util.Map;
 
-import ar.com.novaclean.Models.Constants;
+import ar.com.novaclean.Models.Location;
+import ar.com.novaclean.Models.User;
 import ar.com.novaclean.Models.VisitEvent;
 
-import ar.com.novaclean.Models.Usuario;
 
 public class Calendario extends AppCompatActivity {
     private CompactCalendarView calendarView;
-    private ArrayList<VisitEvent> Itinerario;
-    private Usuario usuario;
+    private ArrayList<VisitEvent> visitEvents;
+    private User user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Itinerario = new ArrayList<VisitEvent>();
+        visitEvents = new ArrayList<VisitEvent>();
         setContentView(R.layout.activity_calendario);
         calendarView= findViewById(R.id.compactcalendar_view);
-        usuario = (Usuario) getIntent().getSerializableExtra("Usuario");
-        if(usuario == null)
+        Gson gson = new Gson();
+
+        user =gson.fromJson(getIntent().getStringExtra("user"),User.class);
+        if(user == null)
             finish();
         String month= new SimpleDateFormat("MMMM").format(calendarView.getFirstDayOfCurrentMonth());
+
         ((TextView)findViewById(R.id.mesTV)).setText(month);
         calendarView.setListener(new CompactCalendarView.CompactCalendarViewListener() {
             @Override
@@ -69,13 +66,13 @@ public class Calendario extends AppCompatActivity {
                     //Un Solo evento, ir a ese evento;
                     Intent myIntent = new Intent(Calendario.this, DetallesEvento.class);
                     myIntent.putExtra("VisitEvent", thisDaysVisitEvents.get(0));
-                    myIntent.putExtra("Usuario",usuario);
+                    myIntent.putExtra("Usuario", user);
                     startActivity(myIntent);
                 }
                 else{
                     Intent myIntent = new Intent(Calendario.this, ListaDeEventos.class);
                     myIntent.putExtra("visitEvents", thisDaysVisitEvents);
-                    myIntent.putExtra("Usuario",usuario);
+                    myIntent.putExtra("Usuario", user);
                     myIntent.putExtra("Date",dateClicked);
 
                     startActivity(myIntent);
@@ -87,48 +84,24 @@ public class Calendario extends AppCompatActivity {
             public void onMonthScroll(Date firstDayOfNewMonth) {
                 String month= new SimpleDateFormat("MMMM").format(firstDayOfNewMonth);
                 ((TextView)findViewById(R.id.mesTV)).setText(month);
-                populateCalendario(Itinerario);
+                populateCalendario(visitEvents);
             }
 
 
         });
 
         getEventos();
+        showProgressBar(false);
     }
 
     private void getEventos() {
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, Constants.GET_EVENTOS_FROM_USER,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        //Toast.makeText(MainActivity.this,response,Toast.LENGTH_LONG).show();
-                        Gson g = new Gson();
-                        VisitEvent[] visitEvents;
-                        try{
-                            visitEvents = g.fromJson(response, VisitEvent[].class);
-                            Itinerario = new ArrayList<>(Arrays.asList(visitEvents));
-                            populateCalendario(Itinerario);
-                        }catch(IllegalStateException e){
-                            Toast.makeText(getApplicationContext(),response,Toast.LENGTH_LONG);
-                        }
-                        showProgressBar(false);
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(Calendario.this,error.toString(),Toast.LENGTH_LONG).show();
-                        showProgressBar(false);
-                    }
-                }){
-            @Override
-            protected Map<String,String> getParams(){
-                return usuario.getLoginParams();
+        visitEvents.clear();
+        for(Location location : user.getLocations()){
+            for(VisitEvent visitEvent : location.visitEvents){
+                visitEvents.add(visitEvent);
             }
-
-        };
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(stringRequest);
+        }
+        populateCalendario(visitEvents);
     }
 
     private void populateCalendario(ArrayList<VisitEvent> itinerario) {
@@ -161,12 +134,14 @@ public class Calendario extends AppCompatActivity {
             PB.setVisibility(View.VISIBLE);
         else
             PB.setVisibility(View.INVISIBLE);
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.hamburger, menu);
+
         return true;
     }
     public void MenuClickEvents(MenuItem menuItem){

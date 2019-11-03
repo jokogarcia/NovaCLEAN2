@@ -29,19 +29,19 @@ public class Sector implements Serializable,jsonableInterface {
 
             this.photo_url = jsonObject.getString("photo_url");
 
-            JSONArray jarray = jsonObject.getJSONArray("Tasks");
+            JSONArray jarray = jsonObject.getJSONArray("tasks");
             cleaningTasks = new ArrayList<>();
             for(int i=0;i<jarray.length();i++){
                 JSONObject item = jarray.getJSONObject(i);
-                CleaningTask VE = new CleaningTask();
-                VE.fromJson(item);
-                VE.Sector = this;
-                cleaningTasks.add(VE);
+                CleaningTask cleaningTask = new CleaningTask();
+                cleaningTask.fromJson(item);
+                //cleaningTask.sector_id=this.id;
+                cleaningTasks.add(cleaningTask);
             }
 
 
         }catch ( JSONException ex){
-            Log.d("Login", "JSON Exception: "+ex.toString());
+            Log.d("Login", "JSON Exception in Sector: "+ex.toString());
             return false;
         }
 

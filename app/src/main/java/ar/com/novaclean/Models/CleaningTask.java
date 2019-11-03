@@ -2,6 +2,8 @@ package ar.com.novaclean.Models;
 
 import android.util.Log;
 
+import com.google.gson.JsonObject;
+
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,7 +17,8 @@ public class CleaningTask implements Serializable,jsonableInterface {
     public String descripcion;
     public Time duration;
     public int frequency;
-    public Sector Sector;
+    public int sector_id;
+    //public Sector Sector;
 
     @Override
     public boolean fromJson(@NotNull JSONObject jsonObject) {
@@ -24,10 +27,12 @@ public class CleaningTask implements Serializable,jsonableInterface {
             this.descripcion = jsonObject.getString("description");
             this.duration = Time.valueOf(jsonObject.getString("duration"));
             this.frequency = jsonObject.getInt("frequency");
-            this.Sector = new Sector();
-            this.Sector.fromJson(jsonObject.getJSONObject("Sector"));
+            this.sector_id = jsonObject.getInt("sector_id");
+
+
+            //this.Sector.fromJson(jsonObject.getJSONObject("sector"));
         }catch ( JSONException ex){
-            Log.d("Login", "JSON Exception: "+ex.toString());
+            Log.d("Login", "JSON Exception in CleaningTask id "+this.id+": "+ex.toString());
             return false;
         }
         return true;

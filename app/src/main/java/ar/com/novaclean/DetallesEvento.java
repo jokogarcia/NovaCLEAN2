@@ -19,25 +19,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
+
 
 import ar.com.novaclean.Models.CleaningTask;
-import ar.com.novaclean.Models.Constants;
-import ar.com.novaclean.Models.Employee;
+
 import ar.com.novaclean.Models.Sector;
-import ar.com.novaclean.Models.User;
 import ar.com.novaclean.Models.VisitEvent;
-import ar.com.novaclean.Models.Usuario;
+import ar.com.novaclean.Models._user;
 
 import static ar.com.novaclean.Utils.UtilsKt.getShortDate;
 
@@ -55,7 +48,10 @@ public class DetallesEvento extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle("Visita programada");
-        visitEventCurrent = (VisitEvent) getIntent().getSerializableExtra("VisitEvent");
+        Gson gson = new Gson();
+        String visitEventJson = getIntent().getStringExtra("VisitEventJson");
+        visitEventCurrent = gson.fromJson(visitEventJson,VisitEvent.class);
+        //visitEventCurrent = (VisitEvent) getIntent().getSerializableExtra("visitEvent");
         apiToken = getIntent().getStringExtra("apiToken");
         setContentView(R.layout.activity_detalles_evento);
 
@@ -98,17 +94,17 @@ public class DetallesEvento extends AppCompatActivity
             TareasWidgList = new ArrayList<>();
         TareasWidgList.clear();
         final ViewGroup TareasContainer = findViewById(R.id.tareasContainer);
-        Sector previousSector=null;
+        int previousSector=0;
         for (CleaningTask t : visitEventCurrent.cleaningTasks) {
 
             TareaWidg T = new TareaWidg(t,getLayoutInflater(), TareasContainer);
 
-            if(!t.Sector.equals(previousSector)){
+            if(t.sector_id != previousSector){
                 TextView TV = new TextView(getApplicationContext());
-                TV.setText("Sector "+t.Sector);
+                TV.setText("Sector "+t.sector_id);
                 TV.setTextColor(Color.WHITE);
                 TareasContainer.addView(TV);
-                previousSector=t.Sector;
+                previousSector=t.sector_id;
             }
             TareasContainer.addView(T.getView());
         }
@@ -117,7 +113,7 @@ public class DetallesEvento extends AppCompatActivity
 
 
     @Override
-    public void onFragmentInteraction(@NotNull User employee) {
+    public void onFragmentInteraction(@NotNull _user employee) {
         Intent myIntent = new Intent(this, DetallesEmpleado.class);
         myIntent.putExtra("employee_id", employee.getId());
         myIntent.putExtra("apiToken", apiToken);
@@ -135,9 +131,13 @@ public class DetallesEvento extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        for (User employee : visitEventCurrent.asignedEmployees){
-            fragmentTransaction.add(R.id.empleadosContainer,
-                    fichaEmpleadoChica.newInstance(employee) );
+        try{
+            for (_user employee : visitEventCurrent.asignedEmployees){
+                fragmentTransaction.add(R.id.empleadosContainer,
+                        fichaEmpleadoChica.newInstance(employee) );
+            }
+        }catch(NullPointerException ex){
+            Log.d("JOKO","Null pointer here");
         }
         fragmentTransaction.commit();
     }

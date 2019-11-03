@@ -5,23 +5,22 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ViewGroup
 import ar.com.novaclean.Models.VisitEvent
-import ar.com.novaclean.Models.Usuario
 import java.util.*
 import kotlin.collections.ArrayList
 
 class EmpleadoHome : AppCompatActivity() , evento_list_fragment.OnFragmentInteractionListener  {
 
 
-    lateinit var usuario :Usuario
+    var apiToken=""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_empleado_home)
-        usuario = intent.getSerializableExtra("Usuario") as Usuario
-        val EventosDelDia : ArrayList<VisitEvent> = getEventosByUsuario(usuario)
+        apiToken = intent.getStringExtra("apiToken")
+        val EventosDelDia : ArrayList<VisitEvent> = getEventosByUsuario(apiToken)
         populateItinerario(EventosDelDia)
     }
 
-    private fun getEventosByUsuario(usuario: Usuario): ArrayList<VisitEvent> {
+    private fun getEventosByUsuario(apiToken: String): ArrayList<VisitEvent> {
         val eventos = ArrayList<VisitEvent>()
         val dummy = VisitEvent()
         dummy.date = Date()
@@ -45,7 +44,7 @@ class EmpleadoHome : AppCompatActivity() , evento_list_fragment.OnFragmentIntera
     override fun onSelectedEvent(visitEvent: VisitEvent?) {
         val newIntent= Intent(applicationContext,DetallesEvento::class.java)
         newIntent.putExtra("VisitEvent",visitEvent)
-        newIntent.putExtra("Usuario", usuario)
+        newIntent.putExtra("apiToken", apiToken)
 
         startActivity(newIntent)
     }
