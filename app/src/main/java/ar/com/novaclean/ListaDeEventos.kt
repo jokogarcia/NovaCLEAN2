@@ -3,6 +3,7 @@ package ar.com.novaclean
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -10,11 +11,13 @@ import ar.com.novaclean.Models.Location
 
 import ar.com.novaclean.Models.VisitEvent
 import ar.com.novaclean.Models.User
+import ar.com.novaclean.Models._user
 import ar.com.novaclean.Utils.RequestResult
 import ar.com.novaclean.Utils.RequestResultListener
 import ar.com.novaclean.Utils.getLongDate
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_lista_de_eventos.*
+import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -29,7 +32,6 @@ class ListaDeEventos : AppCompatActivity(),evento_list_fragment.OnFragmentIntera
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_lista_de_eventos)
-        //visitEvents = intent.getSerializableExtra("visitEvents") as ArrayList<VisitEvent>
         val apiToken = intent.getStringExtra("apiToken")
         user.Home(apiToken, object : RequestResultListener {
             override fun OnRequestResult(requestResult: RequestResult) {
@@ -82,9 +84,15 @@ class ListaDeEventos : AppCompatActivity(),evento_list_fragment.OnFragmentIntera
         if(view.id == R.id.ibCalendar){
             val calendarioIntent = Intent(this,Calendario::class.java)
             val gson= Gson()
-            val userJson=gson.toJson(user)
-            calendarioIntent.putExtra("user",userJson)
-            startActivity(calendarioIntent)
+            var uu: _user = user
+            try{
+                val userJson=gson.toJson(uu)
+                calendarioIntent.putExtra("user",userJson)
+                startActivity(calendarioIntent)
+            }catch (ex:Exception){
+                Log.d("WTF", ex.message)
+            }
+
         }
         else if(view.id == R.id.ibNew){
             Toast.makeText(this,"No implementado",Toast.LENGTH_LONG).show();

@@ -67,8 +67,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //for debug only:
-        ((EditText)findViewById(R.id.userEmail)).setText("jackeline12@example.net");
-        ((EditText)findViewById(R.id.userPass)).setText("password");
+        ((EditText)findViewById(R.id.userEmail)).setText("edelar@edelar.com");
+        ((EditText)findViewById(R.id.userPass)).setText("123");
         doLogin();
 
     }
@@ -82,8 +82,9 @@ public class MainActivity extends AppCompatActivity {
             public void OnLoginResult(LoginResult loginResult) {
                 if(loginResult.success){
                     //getVisitEvents(loginResult.user);
+                    String apiToken = loginResult.user.getApi_token();
                     Intent intent = new Intent(MainActivity.this,ListaDeEventos.class);
-                    intent.putExtra("apiToken", loginResult.user.getApi_token());
+                    intent.putExtra("apiToken", apiToken);
                     startActivity(intent);
                 }
                 else{

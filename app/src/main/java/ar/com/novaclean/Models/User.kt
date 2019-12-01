@@ -24,8 +24,7 @@ class User: _user(),RequestCallbackInterface{
 
 
     val Locations = mutableListOf<Location>()
-    private lateinit var loginResultListener:LoginResultListener
-    private lateinit var requestResultListener: RequestResultListener
+
 
     override fun fromJson(data:JSONObject):Boolean{
         super.fromJson(data)

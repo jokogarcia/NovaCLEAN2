@@ -71,8 +71,7 @@ public class Calendario extends AppCompatActivity {
                 }
                 else{
                     Intent myIntent = new Intent(Calendario.this, ListaDeEventos.class);
-                    myIntent.putExtra("visitEvents", thisDaysVisitEvents);
-                    myIntent.putExtra("Usuario", user);
+                    myIntent.putExtra("apiToken", user.getApi_token());
                     myIntent.putExtra("Date",dateClicked);
 
                     startActivity(myIntent);

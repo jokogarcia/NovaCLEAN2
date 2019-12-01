@@ -59,8 +59,17 @@ public class Location implements Serializable,jsonableInterface {
             this.local_contact_phone = jsonObject.getString("local_contact_phone");
             this.contract_number = jsonObject.getString("contract_number");
             this.name = jsonObject.getString("name");
-            this.latitude = jsonObject.getDouble("latitude");
-            this.longitude = jsonObject.getDouble("longitude");
+            try{
+                this.latitude = jsonObject.getDouble("latitude");
+            }catch(JSONException e){
+                this.latitude = 500;
+            }
+
+            try{
+                this.longitude = jsonObject.getDouble("longitude");
+            }catch(JSONException e){
+                this.longitude = 500;
+            }
             this.Supervisor = new _user();
             this.Supervisor.fromJson(jsonObject.getJSONObject("supervisor"));
             this.photo_url = jsonObject.getString("photo_url");

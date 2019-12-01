@@ -2,6 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ar.com.novaclean">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,9 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".EmpleadoHome"></activity>
+        <activity android:name=".EmpleadoHome" />
         <activity android:name=".ReclamoComentarioYfoto" />
-        <activity android:name=".ReclamoCalidad" />
         <activity android:name=".reclamo_puntualidad" />
         <activity android:name=".ReclamoPickTarea" />
         <activity
@@ -19,7 +27,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_reclamo"
             android:theme="@style/FullscreenTheme" />
-        <activity android:name=".Calificar" />
         <activity android:name=".Observacion1" />
         <activity android:name=".DetallesEmpleado" />
         <activity android:name=".ListaDeEventos" />
@@ -46,14 +53,5 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
-
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="true" />
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

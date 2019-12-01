@@ -42,8 +42,8 @@ open class _user:Serializable,jsonableInterface{
     val City = City()
     var UserRole = ""
 
-    private lateinit var loginResultListener:LoginResultListener
-    private lateinit var requestResultListener: RequestResultListener
+    protected lateinit var loginResultListener:LoginResultListener
+    protected lateinit var requestResultListener: RequestResultListener
 
     open override fun fromJson(data:JSONObject):Boolean{
 
@@ -58,11 +58,6 @@ open class _user:Serializable,jsonableInterface{
             this.cuit=data.getString("cuit")
             this.photo_url=data.getString("photo_url")
 
-            this.birth_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("birth_date"))
-            if(data.getString("employee_start_date")!== "null")
-                this.employee_start_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("employee_start_date"))
-            this.created_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("created_at"))
-            this.updated_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("updated_at"))
 
             this.email =data.getString("email")
             this.api_token=data.getString("api_token")
@@ -71,6 +66,14 @@ open class _user:Serializable,jsonableInterface{
             this.UserRole=_UserRole.getString("role")
 
             this.City.fromJson(data.getJSONObject("city"))
+
+
+            this.created_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("created_at"))
+            this.updated_at=SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(data.getString("updated_at"))
+            if(data.getString("birth_date")!== "null")
+                this.birth_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("birth_date"))
+            if(data.getString("employee_start_date")!== "null")
+                this.employee_start_date = SimpleDateFormat("yyyy-MM-dd").parse(data.getString("employee_start_date"))
 
 
 
